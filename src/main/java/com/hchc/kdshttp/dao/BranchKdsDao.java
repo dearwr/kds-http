@@ -1,0 +1,76 @@
+package com.hchc.kdshttp.dao;
+
+import com.hchc.kdshttp.entity.TBranchKds;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Date;
+import java.util.List;
+
+/**
+ * @author wangrong
+ * @date 2020-06-02
+ */
+@Repository
+public class BranchKdsDao {
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    public boolean add(TBranchKds kds) {
+        String sql = "insert into t_branch_kds(f_hqid, f_branchid, f_name, f_uuid, f_create_time, f_online_time) " +
+                "values(?, ?, ?, ?, ?, ?)";
+        Object[] params = new Object[]{
+                kds.getHqId(), kds.getBranchId(), kds.getName(), kds.getUuid(), new Date(), new Date()
+        };
+        return jdbcTemplate.update(sql, params) > 0;
+    }
+
+    public boolean update(TBranchKds kds) {
+        String sql = "update t_branch_kds set f_name=?, f_hqid=?, f_branchid=?, f_open=?, f_offline_time=?, f_online_time=?, f_version=? where f_uuid=? ";
+        return jdbcTemplate.update(sql, kds.getName(), kds.getHqId(), kds.getBranchId(), kds.isOpen(), kds.getOffLineTime(), new Date(), kds.getVersion(), kds.getUuid()) > 0;
+    }
+
+    public TBranchKds query(String uuid) {
+        String sql = "select * from t_branch_kds where f_uuid=? ";
+        List<TBranchKds> kdsList = jdbcTemplate.query(sql, this::queryMapping, uuid);
+        if (CollectionUtils.isEmpty(kdsList)) {
+            return null;
+        }
+        return kdsList.get(0);
+    }
+
+
+    public List<String> queryUUIDs(int hqId, int branchId) {
+        String sql = "select f_uuid from t_branch_kds where f_hqid=? and f_branchid=? and f_open=1 ";
+        return jdbcTemplate.queryForList(sql, String.class, hqId, branchId);
+    }
+
+    public boolean delete(String uuid) {
+        String sql = "delete from t_branch_kds where f_uuid=? ";
+        return jdbcTemplate.update(sql, uuid) > 0;
+    }
+
+    private TBranchKds queryMapping(ResultSet rs, int i) throws SQLException {
+        TBranchKds kds = new TBranchKds();
+        kds.setHqId(rs.getInt("f_hqid"));
+        kds.setBranchId(rs.getInt("f_branchid"));
+        kds.setUuid(rs.getString("f_uuid"));
+        kds.setName(rs.getString("f_name"));
+        kds.setCreateTime(rs.getTime("f_create_time"));
+        kds.setOpen(rs.getBoolean("f_open"));
+        kds.setOffLineTime(rs.getTime("f_offline_time"));
+        kds.setOnlineTime(rs.getTime("f_online_time"));
+        kds.setVersion(rs.getString("f_version"));
+        return kds;
+    }
+
+    public boolean updateHeartTime(Date heartTime, int hqId, int branchId, String uuid) {
+        String sql = "update t_branch_kds set f_heart_time=? where f_hqid=? and f_branchid=? and f_uuid=?";
+        return jdbcTemplate.update(sql, heartTime, hqId, branchId, uuid) > 0;
+    }
+}
