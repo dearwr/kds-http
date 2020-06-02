@@ -45,18 +45,21 @@ public class MsgController {
         Date startTime = DatetimeUtil.dayBegin(endTime);
         QueryMsg queryMsg;
         List<QueryMsg> queryMsgList;
+        List<String> msgIds;
         try {
-            List<KdsMessage> messages = kdsMsgService.queryUnPushedMsg(uuid, startTime, endTime, -1);
+            List<KdsMessage> messages = kdsMsgService.queryUnPushedMsg(branchId, uuid, startTime, endTime, -1);
             queryMsgList = new ArrayList<>(messages.size());
+            msgIds = new ArrayList<>(messages.size());
             for (KdsMessage msg : messages) {
                 queryMsg = new QueryMsg();
+                msgIds.add(msg.getMessageId());
                 queryMsg.setMsgId(msg.getMessageId());
                 queryMsg.setOrderNo(msg.getOrderNo());
                 queryMsg.setLogAction(msg.getLogAction());
-                queryMsg.setOrder(JSON.toJSONString(msg));
+                queryMsg.setOrder(msg.getData());
                 queryMsgList.add(queryMsg);
             }
-            log.info("[loopQuery] send result data:{}", JSON.toJSONString(queryMsgList));
+            log.info("[loopQuery] send result msgIds:{}", JSON.toJSONString(msgIds));
         } catch (Exception e) {
             e.printStackTrace();
             log.info("[loopQuery] happen error :{}", e.getMessage());

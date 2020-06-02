@@ -156,13 +156,15 @@ public class KdsMsgService {
 
     /**
      * 查询未读的消息
-     *
+     * @param branchId
      * @param uuid
+     * @param startTime
+     * @param endTime
      * @param size
      * @return
      */
-    public List<KdsMessage> queryUnPushedMsg(String uuid, Date startTime, Date endTime, int size) {
-        return kdsMsgDao.queryUnPushed(uuid, startTime, endTime, size);
+    public List<KdsMessage> queryUnPushedMsg(String branchId, String uuid, Date startTime, Date endTime, int size) {
+        return kdsMsgDao.queryUnPushed(branchId, uuid, startTime, endTime, size);
     }
 
     /**

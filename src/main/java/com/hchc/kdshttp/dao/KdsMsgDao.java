@@ -67,9 +67,13 @@ public class KdsMsgDao {
     }
 
 
-    public List<KdsMessage> queryUnPushed(String uuid, Date startTime, Date endTime, int size) {
-        StringBuilder sql = new StringBuilder("select * from t_kds_message where f_status=1 and f_push_status=0 ");
+    public List<KdsMessage> queryUnPushed(String branchId, String uuid, Date startTime, Date endTime, int size) {
+        StringBuilder sql = new StringBuilder("select f_message_id, f_order_no, f_log_action, f_data from t_kds_message where f_status=1 and f_push_status=0 ");
         List<Object> paramList = new ArrayList<>();
+        if (branchId != null) {
+            sql.append(" and f_branchid=? ");
+            paramList.add(branchId);
+        }
         if (uuid != null) {
             sql.append(" and f_uuid=? ");
             paramList.add(uuid);
@@ -96,11 +100,9 @@ public class KdsMsgDao {
     private KdsMessage queryMapping(ResultSet rs, int i) throws SQLException {
         KdsMessage tkm = new KdsMessage();
         tkm.setMessageId(rs.getString("f_message_id"));
-        tkm.setBranchId(rs.getInt("f_branchid"));
-        tkm.setData(rs.getString("f_data"));
+        tkm.setOrderNo(rs.getString("f_order_no"));
         tkm.setLogAction(rs.getString("f_log_action"));
-        tkm.setUuid(rs.getString("f_uuid"));
-        tkm.setType(rs.getString("f_type"));
+        tkm.setData(rs.getString("f_data"));
         return tkm;
     }
 
