@@ -2,10 +2,10 @@ package com.hchc.kdshttp.service;
 
 import com.hchc.kdshttp.dao.KdsMsgDao;
 import com.hchc.kdshttp.dao.KdsOrderDao;
-import com.hchc.kdshttp.entity.TBranchKds;
-import com.hchc.kdshttp.entity.TKdsMessage;
-import com.hchc.kdshttp.entity.TKdsOrder;
-import com.hchc.kdshttp.mode.KdsInfo;
+import com.hchc.kdshttp.entity.BranchKds;
+import com.hchc.kdshttp.entity.KdsMessage;
+import com.hchc.kdshttp.entity.KdsOrder;
+import com.hchc.kdshttp.mode.request.KdsInfo;
 import com.hchc.kdshttp.util.DatetimeUtil;
 import com.hchc.kdshttp.util.StringUtil;
 import org.apache.logging.log4j.LogManager;
@@ -43,6 +43,15 @@ public class KdsMsgService {
     private BranchKdsService branchKdsService;
 
     /**
+     * 确认消息接收
+     * @param msgIds
+     * @return
+     */
+    public boolean confirmMsg(List<String> msgIds) {
+        return kdsMsgDao.updatePushed(msgIds);
+    }
+
+    /**
      * 根据订单生成消息
      *
      * @param tOrder        订单
@@ -50,7 +59,7 @@ public class KdsMsgService {
      * @param completedUUID 消息设置为推送完成的uuid
      * @return
      */
-    public List<TKdsMessage> createMsgByOrder(TKdsOrder tOrder, List<String> uuidList, String completedUUID) {
+    public List<KdsMessage> createMsgByOrder(KdsOrder tOrder, List<String> uuidList, String completedUUID) {
         if (CollectionUtils.isEmpty(uuidList)) {
             uuidList = branchKdsService.queryUUIDs(tOrder.getHqId(), tOrder.getBranchId());
             if (CollectionUtils.isEmpty(uuidList)) {
@@ -58,10 +67,10 @@ public class KdsMsgService {
                 return Collections.emptyList();
             }
         }
-        List<TKdsMessage> messages = new ArrayList<>();
-        TKdsMessage message;
+        List<KdsMessage> messages = new ArrayList<>();
+        KdsMessage message;
         for (String uuid : uuidList) {
-            message = new TKdsMessage();
+            message = new KdsMessage();
             message.setMessageId(StringUtil.generateMessageId("kds"));
             message.setBranchId(tOrder.getBranchId());
             message.setData(tOrder.getData());
@@ -84,18 +93,18 @@ public class KdsMsgService {
      * @param kdsInfo
      * @return
      */
-    public List<TKdsMessage> loadMsgForConnect(KdsInfo kdsInfo) {
+    public void bindKds(KdsInfo kdsInfo) {
         String uuid = kdsInfo.getDeviceUUID();
-        TBranchKds oldKds = branchKdsService.queryByUUID(uuid);
+        BranchKds oldKds = branchKdsService.queryByUUID(uuid);
         if (oldKds == null) {
             logger.info("[loadMsgForConnect] create kds to db, uuid:{}", uuid);
-            TBranchKds kds = new TBranchKds();
+            BranchKds kds = new BranchKds();
             kds.setHqId(kdsInfo.getHqId());
             kds.setBranchId(kdsInfo.getBranchId());
             kds.setUuid(kdsInfo.getDeviceUUID());
             kds.setVersion(kdsInfo.getVersionCode());
             branchKdsService.saveKds(kds);
-            return queryBranchMsg(kdsInfo);
+            createBranchMsg(kdsInfo);
         } else {
             int newHqId = kdsInfo.getHqId();
             int newBranchId = kdsInfo.getBranchId();
@@ -109,12 +118,11 @@ public class KdsMsgService {
                 Date end = new Date();
                 Date start = DatetimeUtil.dayBegin(end);
                 kdsMsgDao.updateInvalidMsg(newBranchId, uuid, start, end);
-                return queryBranchMsg(kdsInfo);
+                createBranchMsg(kdsInfo);
             } else {
                 if (versionChanged) {
                     branchKdsService.update(oldKds);
                 }
-                return loadUnPushedMsg(oldKds.getUuid(), null, null, -1);
             }
         }
     }
@@ -125,7 +133,7 @@ public class KdsMsgService {
      * @param oldKds
      * @param kdsInfo
      */
-    private boolean judgeVersionChanged(TBranchKds oldKds, KdsInfo kdsInfo) {
+    private boolean judgeVersionChanged(BranchKds oldKds, KdsInfo kdsInfo) {
         String newVersion = kdsInfo.getVersionCode();
         if (!StringUtils.isEmpty(newVersion) && !newVersion.equals(oldKds.getVersion())) {
             logger.info("[judgeVersionChanged] kds change version {} to {}, uuid:{}", oldKds.getVersion(), newVersion, oldKds.getUuid());
@@ -135,31 +143,25 @@ public class KdsMsgService {
         return false;
     }
 
-    private List<TKdsMessage> queryBranchMsg(KdsInfo kdsInfo) {
+    private void createBranchMsg(KdsInfo kdsInfo) {
         Date end = new Date();
         Date start = DatetimeUtil.dayBegin(end);
-        List<TKdsOrder> orders = kdsOrderDao.queryUncompleted(kdsInfo.getHqId(), kdsInfo.getBranchId(), start, end);
-        List<TKdsMessage> messages = new ArrayList<>();
-        for (TKdsOrder order : orders) {
+        List<KdsOrder> orders = kdsOrderDao.queryUncompleted(kdsInfo.getHqId(), kdsInfo.getBranchId(), start, end);
+        List<KdsMessage> messages = new ArrayList<>();
+        for (KdsOrder order : orders) {
             messages.addAll(createMsgByOrder(order, Collections.singletonList(kdsInfo.getDeviceUUID()), null));
         }
         kdsMsgDao.batchAdd(messages);
-        return messages;
     }
 
     /**
-     * 加载消息
-     * 入参若没有起始时间，默认传当天所有的消息
+     * 查询未读的消息
      *
      * @param uuid
      * @param size
      * @return
      */
-    public List<TKdsMessage> loadUnPushedMsg(String uuid, Date startTime, Date endTime, int size) {
-        if (startTime == null) {
-            endTime = new Date();
-            startTime = DatetimeUtil.dayBegin(endTime);
-        }
+    public List<KdsMessage> queryUnPushedMsg(String uuid, Date startTime, Date endTime, int size) {
         return kdsMsgDao.queryUnPushed(uuid, startTime, endTime, size);
     }
 
@@ -170,13 +172,13 @@ public class KdsMsgService {
      * @param orderNo
      * @return
      */
-    public TKdsMessage queryOrderNewStatusMsg(String uuid, String orderNo) {
-        List<TKdsMessage> messages = kdsMsgDao.queryOrderMsg(uuid, orderNo);
+    public KdsMessage queryOrderNewStatusMsg(String uuid, String orderNo) {
+        List<KdsMessage> messages = kdsMsgDao.queryOrderMsg(uuid, orderNo);
         if (CollectionUtils.isEmpty(messages)) {
             logger.info("[queryOrderNewStatusMsg] not find msg, uuid:{}, no:{}", uuid, orderNo);
             return null;
         }
-        List<String> actions = messages.stream().map(TKdsMessage::getLogAction).collect(Collectors.toList());
+        List<String> actions = messages.stream().map(KdsMessage::getLogAction).collect(Collectors.toList());
         if (actions.contains(ORDER_REFUND.getLogAction())) {
             return getMsgByAction(ORDER_REFUND.getLogAction(), messages);
         } else if (actions.contains(ORDER_COMPLETE.getLogAction())) {
@@ -194,8 +196,8 @@ public class KdsMsgService {
         }
     }
 
-    private TKdsMessage getMsgByAction(String action, List<TKdsMessage> messages) {
-        for (TKdsMessage msg : messages) {
+    private KdsMessage getMsgByAction(String action, List<KdsMessage> messages) {
+        for (KdsMessage msg : messages) {
             if (action.equals(msg.getLogAction())) {
                 return msg;
             }

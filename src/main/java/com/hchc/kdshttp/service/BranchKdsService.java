@@ -1,7 +1,7 @@
 package com.hchc.kdshttp.service;
 
 import com.hchc.kdshttp.dao.BranchKdsDao;
-import com.hchc.kdshttp.entity.TBranchKds;
+import com.hchc.kdshttp.entity.BranchKds;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,16 +17,16 @@ public class BranchKdsService {
     @Autowired
     private BranchKdsDao branchKdsDao;
 
-    public boolean saveKds(TBranchKds kds) {
+    public boolean saveKds(BranchKds kds) {
         return branchKdsDao.add(kds);
     }
 
-    public TBranchKds queryByUUID(String uuid) {
+    public BranchKds queryByUUID(String uuid) {
         return branchKdsDao.query(uuid);
     }
 
 
-    public void update(TBranchKds oldKds) {
+    public void update(BranchKds oldKds) {
         branchKdsDao.update(oldKds);
     }
 

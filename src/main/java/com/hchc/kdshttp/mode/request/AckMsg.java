@@ -1,4 +1,4 @@
-package com.hchc.kdshttp.mode;
+package com.hchc.kdshttp.mode.request;
 
 import lombok.Data;
 
@@ -9,7 +9,7 @@ import java.util.List;
  * @date 2020-06-02
  */
 @Data
-public class AckMsgRequest {
+public class AckMsg {
 
     private List<String> msgIds;
 

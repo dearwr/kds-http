@@ -1,4 +1,4 @@
-package com.hchc.kdshttp.mode;
+package com.hchc.kdshttp.mode.response;
 
 import lombok.Data;
 
@@ -7,7 +7,7 @@ import lombok.Data;
  * @date 2020-06-02
  */
 @Data
-public class QueryMsgResponse {
+public class QueryMsg {
 
     private String msgId;
     private String orderNo;

@@ -1,6 +1,6 @@
 package com.hchc.kdshttp.dao;
 
-import com.hchc.kdshttp.entity.TKdsMessage;
+import com.hchc.kdshttp.entity.KdsMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public class KdsMsgDao {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public void batchAdd(List<TKdsMessage> messages) {
+    public void batchAdd(List<KdsMessage> messages) {
         if (CollectionUtils.isEmpty(messages)) {
             return;
         }
@@ -35,7 +35,7 @@ public class KdsMsgDao {
                 "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         List<Object[]> paramList = new ArrayList<>();
         Object[] param;
-        for (TKdsMessage msg : messages) {
+        for (KdsMessage msg : messages) {
             param = new Object[]{
                     msg.getMessageId(), msg.getBranchId(), msg.getUuid(), msg.getOrderNo(), msg.getData(), msg.getLogAction(), new Date(), msg.getType(),
                     msg.isPushed(), msg.getPushedTime()
@@ -49,9 +49,10 @@ public class KdsMsgDao {
         }
     }
 
-    public boolean updatePushed(String messageId) {
-        String sql = "update t_kds_message set f_push_status=1 , f_pushed_time=?, f_status=0, f_invalid_time=? where f_message_id=? ";
-        return jdbcTemplate.update(sql, new Date(), new Date(), messageId) > 0;
+    public boolean updatePushed(List<String> msgIds) {
+        String msgIdStr = String.join("','", msgIds);
+        String sql = "update t_kds_message set f_push_status=1 , f_pushed_time=?, where f_message_id in ('" + msgIdStr + "') ";
+        return jdbcTemplate.update(sql, new Date()) > 0;
     }
 
     public boolean updateInvalidMsg(String orderNo, List<String> logActions) {
@@ -66,7 +67,7 @@ public class KdsMsgDao {
     }
 
 
-    public List<TKdsMessage> queryUnPushed(String uuid, Date startTime, Date endTime, int size) {
+    public List<KdsMessage> queryUnPushed(String uuid, Date startTime, Date endTime, int size) {
         StringBuilder sql = new StringBuilder("select * from t_kds_message where f_status=1 and f_push_status=0 ");
         List<Object> paramList = new ArrayList<>();
         if (uuid != null) {
@@ -85,15 +86,15 @@ public class KdsMsgDao {
             sql.append(" limit 0,? ");
             paramList.add(size);
         }
-        List<TKdsMessage> messages = jdbcTemplate.query(sql.toString(), this::queryMapping, paramList.toArray());
+        List<KdsMessage> messages = jdbcTemplate.query(sql.toString(), this::queryMapping, paramList.toArray());
         if (CollectionUtils.isEmpty(messages)) {
             return Collections.emptyList();
         }
         return messages;
     }
 
-    private TKdsMessage queryMapping(ResultSet rs, int i) throws SQLException {
-        TKdsMessage tkm = new TKdsMessage();
+    private KdsMessage queryMapping(ResultSet rs, int i) throws SQLException {
+        KdsMessage tkm = new KdsMessage();
         tkm.setMessageId(rs.getString("f_message_id"));
         tkm.setBranchId(rs.getInt("f_branchid"));
         tkm.setData(rs.getString("f_data"));
@@ -103,7 +104,7 @@ public class KdsMsgDao {
         return tkm;
     }
 
-    public List<TKdsMessage> queryOrderMsg(String uuid, String orderNo) {
+    public List<KdsMessage> queryOrderMsg(String uuid, String orderNo) {
         String sql = "select * from t_kds_message where f_uuid = ? and f_order_no = ? order by f_create_time desc ";
         return jdbcTemplate.query(sql, this::queryMapping, uuid, orderNo);
     }

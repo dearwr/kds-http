@@ -1,4 +1,4 @@
-package com.hchc.kdshttp.mode;
+package com.hchc.kdshttp.mode.kds;
 
 import java.io.Serializable;
 

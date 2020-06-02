@@ -1,6 +1,6 @@
 package com.hchc.kdshttp.dao;
 
-import com.hchc.kdshttp.entity.TBranchKds;
+import com.hchc.kdshttp.entity.BranchKds;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -21,7 +21,7 @@ public class BranchKdsDao {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public boolean add(TBranchKds kds) {
+    public boolean add(BranchKds kds) {
         String sql = "insert into t_branch_kds(f_hqid, f_branchid, f_name, f_uuid, f_create_time, f_online_time) " +
                 "values(?, ?, ?, ?, ?, ?)";
         Object[] params = new Object[]{
@@ -30,14 +30,14 @@ public class BranchKdsDao {
         return jdbcTemplate.update(sql, params) > 0;
     }
 
-    public boolean update(TBranchKds kds) {
+    public boolean update(BranchKds kds) {
         String sql = "update t_branch_kds set f_name=?, f_hqid=?, f_branchid=?, f_open=?, f_offline_time=?, f_online_time=?, f_version=? where f_uuid=? ";
         return jdbcTemplate.update(sql, kds.getName(), kds.getHqId(), kds.getBranchId(), kds.isOpen(), kds.getOffLineTime(), new Date(), kds.getVersion(), kds.getUuid()) > 0;
     }
 
-    public TBranchKds query(String uuid) {
+    public BranchKds query(String uuid) {
         String sql = "select * from t_branch_kds where f_uuid=? ";
-        List<TBranchKds> kdsList = jdbcTemplate.query(sql, this::queryMapping, uuid);
+        List<BranchKds> kdsList = jdbcTemplate.query(sql, this::queryMapping, uuid);
         if (CollectionUtils.isEmpty(kdsList)) {
             return null;
         }
@@ -55,8 +55,8 @@ public class BranchKdsDao {
         return jdbcTemplate.update(sql, uuid) > 0;
     }
 
-    private TBranchKds queryMapping(ResultSet rs, int i) throws SQLException {
-        TBranchKds kds = new TBranchKds();
+    private BranchKds queryMapping(ResultSet rs, int i) throws SQLException {
+        BranchKds kds = new BranchKds();
         kds.setHqId(rs.getInt("f_hqid"));
         kds.setBranchId(rs.getInt("f_branchid"));
         kds.setUuid(rs.getString("f_uuid"));

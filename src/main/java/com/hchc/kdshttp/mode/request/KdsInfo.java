@@ -1,4 +1,4 @@
-package com.hchc.kdshttp.mode;
+package com.hchc.kdshttp.mode.request;
 
 import lombok.Data;
 

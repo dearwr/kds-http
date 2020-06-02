@@ -5,11 +5,10 @@ import com.hchc.kdshttp.constant.ActionEnum;
 import com.hchc.kdshttp.constant.OrderType;
 import com.hchc.kdshttp.dao.KdsMsgDao;
 import com.hchc.kdshttp.dao.KdsOrderDao;
-import com.hchc.kdshttp.entity.TKdsMessage;
-import com.hchc.kdshttp.entity.TKdsOrder;
-import com.hchc.kdshttp.mode.KdsOrder;
-import com.hchc.kdshttp.mode.KdsOrderItem;
-import com.hchc.kdshttp.util.DatetimeUtil;
+import com.hchc.kdshttp.entity.KdsMessage;
+import com.hchc.kdshttp.entity.KdsOrder;
+import com.hchc.kdshttp.mode.kds.KdsOrderItem;
+import com.hchc.kdshttp.mode.request.OrderStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -26,9 +24,9 @@ import java.util.List;
  * @date 2020-06-02
  */
 @Service
-public class KdsOrderMsgService {
+public class OrderMsgService {
 
-    private static final Logger logger = LogManager.getLogger(KdsOrderMsgService.class.getName());
+    private static final Logger logger = LogManager.getLogger(OrderMsgService.class.getName());
 
     @Autowired
     private KdsMsgService kdsMsgService;
@@ -42,66 +40,54 @@ public class KdsOrderMsgService {
     /**
      * 消息确认同步订单状态
      *
-     * @param messageId
+     * @param msgIds
      * @return
      */
-    public boolean confirm(String messageId) {
-        return kdsMsgDao.updatePushed(messageId);
+    public boolean confirm(List<String> msgIds) {
+        return kdsMsgDao.updatePushed(msgIds);
     }
 
     /**
      * 根据订单号更新订单状态并生成消息
      *
-     * @param uuid
-     * @param orderNo
-     * @param newLogAction
+     * @param order
      * @return
      */
-    public List<TKdsMessage> getMsgByOrderNo(String uuid, String orderNo, String newLogAction) {
-        TKdsOrder tOrder = kdsOrderDao.query(orderNo);
+    public void changeOrderStatus(OrderStatus order) {
+        KdsOrder tOrder = kdsOrderDao.query(order.getOrderNo());
         if (tOrder == null) {
-            logger.info("[getMsgByOrderNo] not find order :{}", orderNo);
-            return Collections.emptyList();
+            logger.info("[getMsgByOrderNo] not find order :{}", order.getOrderNo());
+            return;
         }
-        return updateOrder(uuid, tOrder, newLogAction);
+        updateOrder(order.getUuid(), tOrder, order.getLogAction());
     }
 
-    private List<TKdsMessage> updateOrder(String uuid, TKdsOrder tOrder, String newLogAction) {
+    private void updateOrder(String uuid, KdsOrder tOrder, String newLogAction) {
         String oldLogAction = tOrder.getLogAction();
         // 检查传入的新状态是否有效
         List<String> validLogActions = ActionEnum.VALID_LOG_ACTION_MAP.get(oldLogAction);
         if (validLogActions != null && validLogActions.contains(newLogAction)) {
-            KdsOrder kdsOrder = JSON.parseObject(tOrder.getData(), KdsOrder.class);
+            com.hchc.kdshttp.mode.kds.KdsOrder kdsOrder = JSON.parseObject(tOrder.getData(), com.hchc.kdshttp.mode.kds.KdsOrder.class);
             checkRefundOrCompleted(tOrder, kdsOrder, newLogAction);
             kdsOrder.setCallAction(ActionEnum.getCallActionByLogAction(newLogAction));
             tOrder.setData(JSON.toJSONString(kdsOrder));
             tOrder.setLogAction(newLogAction);
             tOrder.setUpdateTime(new Date());
-            return updateOrderAndGetMsg(uuid, tOrder);
+            kdsOrderDao.updateOrder(tOrder);
+            createMsg(uuid, tOrder);
         } else {
             logger.info("[updateOrder] {} check logAction is valid, oldAction:{}, newAction:{}", tOrder.getNo(), oldLogAction, newLogAction);
-            return Collections.emptyList();
+            return;
         }
     }
 
-    private List<TKdsMessage> updateOrderAndGetMsg(String uuid, TKdsOrder tOrder) {
-        kdsOrderDao.updateOrder(tOrder);
-        return createAndGetMsg(uuid, tOrder);
-    }
-
-    private List<TKdsMessage> createAndGetMsg(String uuid, TKdsOrder tOrder) {
+    private void createMsg(String uuid, KdsOrder tOrder) {
         if (ActionEnum.INVALID_LOG_ACTION_MAP.get(tOrder.getLogAction()) != null) {
             List<String> invalidLogActions = new ArrayList<>(ActionEnum.INVALID_LOG_ACTION_MAP.get(tOrder.getLogAction()));
-            if (OrderType.STORE.equals(tOrder.getType())) {
-                invalidLogActions.remove(ActionEnum.ORDER_MAKE.getLogAction());
-            }
-            if (!CollectionUtils.isEmpty(invalidLogActions)) {
-                kdsMsgDao.updateInvalidMsg(tOrder.getNo(), invalidLogActions);
-            }
+            kdsMsgDao.updateInvalidMsg(tOrder.getNo(), invalidLogActions);
         }
-        List<TKdsMessage> messages = kdsMsgService.createMsgByOrder(tOrder, null, uuid);
+        List<KdsMessage> messages = kdsMsgService.createMsgByOrder(tOrder, null, uuid);
         kdsMsgDao.batchAdd(messages);
-        return messages;
     }
 
     /**
@@ -111,7 +97,7 @@ public class KdsOrderMsgService {
      * @param kdsOrder
      * @param newLogAction
      */
-    private void checkRefundOrCompleted(TKdsOrder tOrder, KdsOrder kdsOrder, String newLogAction) {
+    private void checkRefundOrCompleted(KdsOrder tOrder, com.hchc.kdshttp.mode.kds.KdsOrder kdsOrder, String newLogAction) {
         // 判断newLogAction是否为退单
         if (ActionEnum.ORDER_REFUND.getLogAction().equals(newLogAction)) {
             tOrder.setCompleted(true);
@@ -127,16 +113,4 @@ public class KdsOrderMsgService {
         }
     }
 
-    /**
-     * 清除数据库表历史数据
-     *
-     * @param dayBefore
-     */
-    public void cleanDayBeforeOrderAndMsg(int dayBefore) {
-        Date endTime = DatetimeUtil.addDay(new Date(), -dayBefore);
-        int count = kdsOrderDao.deleteBeforeTime(endTime);
-        logger.info("[cleanDayBeforeOrderAndMsg] clean order count:{}", count);
-        count = kdsMsgDao.deleteBeforeTime(endTime);
-        logger.info("[cleanDayBeforeOrderAndMsg] clean msg count:{}", count);
-    }
 }

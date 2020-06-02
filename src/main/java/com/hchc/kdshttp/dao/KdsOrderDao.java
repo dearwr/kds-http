@@ -1,6 +1,6 @@
 package com.hchc.kdshttp.dao;
 
-import com.hchc.kdshttp.entity.TKdsOrder;
+import com.hchc.kdshttp.entity.KdsOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -22,7 +22,7 @@ public class KdsOrderDao {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public boolean save(TKdsOrder tko) {
+    public boolean save(KdsOrder tko) {
         String sql = "insert into t_kds_order(f_hqid, f_branchid, f_no, f_grade, f_data, f_type, f_log_action, f_completed, f_create_time, f_update_time) " +
                 "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         Object[] Params = new Object[]{
@@ -31,7 +31,7 @@ public class KdsOrderDao {
         return jdbcTemplate.update(sql, Params) > 0;
     }
 
-    public boolean updateOrder(TKdsOrder tko) {
+    public boolean updateOrder(KdsOrder tko) {
         String sql = "update t_kds_order set f_log_action=?, f_data=?, f_completed=?, f_update_time=? where f_id=? ";
         Object[] params = new Object[]{
                 tko.getLogAction(), tko.getData(), tko.isCompleted(), new Date(), tko.getId()
@@ -39,18 +39,18 @@ public class KdsOrderDao {
         return jdbcTemplate.update(sql, params) > 0;
     }
 
-    public List<TKdsOrder> queryUncompleted(int hqId, int branchId, Date startTime, Date endTime) {
+    public List<KdsOrder> queryUncompleted(int hqId, int branchId, Date startTime, Date endTime) {
         String sql = "select * from t_kds_order where f_hqid=? and f_branchid=? and f_completed=0 and f_create_time between ? and ?  ";
-        List<TKdsOrder> orders = jdbcTemplate.query(sql, this::queryMapping, hqId, branchId, startTime, endTime);
+        List<KdsOrder> orders = jdbcTemplate.query(sql, this::queryMapping, hqId, branchId, startTime, endTime);
         if (CollectionUtils.isEmpty(orders)) {
             return Collections.emptyList();
         }
         return orders;
     }
 
-    public TKdsOrder query(String orderNo) {
+    public KdsOrder query(String orderNo) {
         String sql = "select * from t_kds_order where f_no = ? ";
-        List<TKdsOrder> orders = jdbcTemplate.query(sql, this::queryMapping, orderNo);
+        List<KdsOrder> orders = jdbcTemplate.query(sql, this::queryMapping, orderNo);
         if (CollectionUtils.isEmpty(orders)) {
             return null;
         }
@@ -62,8 +62,8 @@ public class KdsOrderDao {
         return jdbcTemplate.update(sql, endTime);
     }
 
-    private TKdsOrder queryMapping(ResultSet rs, int i) throws SQLException {
-        TKdsOrder tko = new TKdsOrder();
+    private KdsOrder queryMapping(ResultSet rs, int i) throws SQLException {
+        KdsOrder tko = new KdsOrder();
         tko.setId(rs.getInt("f_id"));
         tko.setHqId(rs.getInt("f_hqid"));
         tko.setBranchId(rs.getInt("f_branchid"));
