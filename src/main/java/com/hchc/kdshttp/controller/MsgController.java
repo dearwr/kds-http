@@ -1,25 +1,22 @@
 package com.hchc.kdshttp.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.hchc.kdshttp.entity.KdsMessage;
 import com.hchc.kdshttp.mode.request.AckMsg;
 import com.hchc.kdshttp.mode.request.ChangeStatus;
 import com.hchc.kdshttp.mode.request.OrderStatus;
+import com.hchc.kdshttp.mode.request.QueryParam;
 import com.hchc.kdshttp.mode.response.QueryMsg;
 import com.hchc.kdshttp.pack.Result;
 import com.hchc.kdshttp.service.KdsMsgService;
 import com.hchc.kdshttp.service.OrderMsgService;
-import com.hchc.kdshttp.util.DatetimeUtil;
+import com.hchc.kdshttp.task.Task;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author wangrong
@@ -37,6 +34,7 @@ public class MsgController {
 
     /**
      * 轮询查订单
+     *
      * @param branchId
      * @param uuid
      * @return
@@ -48,34 +46,29 @@ public class MsgController {
             log.info("[loopQuery] param exist empty");
             return Result.fail("param exist empty");
         }
-        Date startTime = DatetimeUtil.dayBegin(new Date());
-        List<QueryMsg> queryMsgList;
-        String[] msgIds;
-        QueryMsg queryMsg;
+        List<QueryMsg> queryData;
         try {
-            List<KdsMessage> messages = kdsMsgService.queryUnPushedMsg(branchId, uuid, startTime, -1);
-            queryMsgList = new ArrayList<>(messages.size());
-            msgIds = new String[messages.size()];
-            for (int i = 0; i < messages.size(); i++) {
-                queryMsg = new QueryMsg();
-                msgIds[i] = messages.get(i).getMessageId();
-                queryMsg.setMsgId(messages.get(i).getMessageId());
-                queryMsg.setOrderNo(messages.get(i).getOrderNo());
-                queryMsg.setLogAction(messages.get(i).getLogAction());
-                queryMsg.setOrder(messages.get(i).getData());
-                queryMsgList.add(queryMsg);
+            queryData = Task.QUERY_DATA.get(uuid);
+            if (queryData != null) {
+                Task.QUERY_DATA.remove(uuid);
+                String[] msgIds = new String[queryData.size()];
+                for (int i = 0; i < queryData.size(); i++) {
+                    msgIds[i] = queryData.get(i).getMsgId();
+                }
+                log.info("[loopQuery] {} {} query msgIds:{}", branchId, uuid, Arrays.toString(msgIds));
             }
-            log.info("[loopQuery] send {} result msgIds:{}", uuid, Arrays.toString(msgIds));
+            Task.WORKER_QUEUE.offer(new QueryParam(branchId, uuid));
         } catch (Exception e) {
             e.printStackTrace();
-            log.info("[loopQuery] happen error :{}", e.getMessage());
+            log.info("[loopQuery] happen error:{}", e.getMessage());
             return Result.fail(e);
         }
-        return Result.ok(queryMsgList);
+        return Result.ok(queryData);
     }
 
     /**
      * 消息确认
+     *
      * @param ackMsg
      * @return
      */
@@ -97,6 +90,7 @@ public class MsgController {
 
     /**
      * 改变订单状态
+     *
      * @param changeStatus
      * @return
      */

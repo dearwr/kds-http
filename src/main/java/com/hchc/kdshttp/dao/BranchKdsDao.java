@@ -55,9 +55,14 @@ public class BranchKdsDao {
         return jdbcTemplate.queryForList(sql, String.class, hqId, branchId);
     }
 
-    public boolean delete(String uuid) {
-        String sql = "delete from t_branch_kds where f_uuid=? ";
-        return jdbcTemplate.update(sql, uuid) > 0;
+    public List<String[]> queryByHqId(int hqId, int size) {
+        String sql = "select f_branchid, f_uuid from t_branch_kds where f_hqid=? and f_open=1 limit 0,?";
+        return jdbcTemplate.query(sql, (set, i) -> {
+            String[] fields = new String[2];
+            fields[0] = set.getString("f_branchid");
+            fields[1] = set.getString("f_uuid");
+            return fields;
+        }, hqId, size);
     }
 
     private BranchKds queryMapping(ResultSet rs, int i) throws SQLException {

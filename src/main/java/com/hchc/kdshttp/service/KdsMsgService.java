@@ -78,18 +78,6 @@ public class KdsMsgService {
     }
 
     /**
-     * 查询未推送成功的消息
-     * @param branchId
-     * @param uuid
-     * @param startTime
-     * @param size
-     * @return
-     */
-    public List<KdsMessage> queryUnPushedMsg(String branchId, String uuid, Date startTime, int size) {
-        return kdsMsgDao.queryUnPushed(branchId, uuid, startTime, size);
-    }
-
-    /**
      * 查询订单最新状态的消息
      *
      * @param uuid
