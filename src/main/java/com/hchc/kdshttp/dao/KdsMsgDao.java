@@ -1,6 +1,7 @@
 package com.hchc.kdshttp.dao;
 
 import com.hchc.kdshttp.entity.KdsMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +21,8 @@ import java.util.List;
  * @date 2020-06-02
  */
 @Repository
+@Slf4j
 public class KdsMsgDao {
-
-    private static final Logger logger = LogManager.getLogger(KdsMsgDao.class.getName());
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -45,7 +45,7 @@ public class KdsMsgDao {
         try {
             jdbcTemplate.batchUpdate(sql, paramList);
         } catch (Exception e) {
-            logger.info("[batchAdd] already exist this type msg in db ，error :{}", e.getMessage());
+            log.info("[batchAdd] already exist this type msg in db ，error :{}", e.getMessage());
         }
     }
 
@@ -67,7 +67,7 @@ public class KdsMsgDao {
     }
 
 
-    public List<KdsMessage> queryUnPushed(String branchId, String uuid, Date startTime, Date endTime, int size) {
+    public List<KdsMessage> queryUnPushed(String branchId, String uuid, Date startTime, int size) {
         StringBuilder sql = new StringBuilder("select f_message_id, f_order_no, f_log_action, f_data from t_kds_message where f_status=1 and f_push_status=0 ");
         List<Object> paramList = new ArrayList<>();
         if (branchId != null) {
@@ -81,10 +81,6 @@ public class KdsMsgDao {
         if (startTime != null) {
             sql.append(" and f_create_time >= ? ");
             paramList.add(startTime);
-        }
-        if (endTime != null) {
-            sql.append(" and f_create_time < ? ");
-            paramList.add(endTime);
         }
         if (size > 0) {
             sql.append(" limit 0,? ");

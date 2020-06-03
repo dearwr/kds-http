@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -41,25 +42,24 @@ public class MsgController {
             log.info("[loopQuery] param exist empty");
             return Result.fail("param exist empty");
         }
-        Date endTime = new Date();
-        Date startTime = DatetimeUtil.dayBegin(endTime);
-        QueryMsg queryMsg;
+        Date startTime = DatetimeUtil.dayBegin(new Date());
         List<QueryMsg> queryMsgList;
-        List<String> msgIds;
+        String[] msgIds;
+        QueryMsg queryMsg;
         try {
-            List<KdsMessage> messages = kdsMsgService.queryUnPushedMsg(branchId, uuid, startTime, endTime, -1);
+            List<KdsMessage> messages = kdsMsgService.queryUnPushedMsg(branchId, uuid, startTime, -1);
             queryMsgList = new ArrayList<>(messages.size());
-            msgIds = new ArrayList<>(messages.size());
-            for (KdsMessage msg : messages) {
+            msgIds = new String[messages.size()];
+            for (int i = 0; i < messages.size(); i++) {
                 queryMsg = new QueryMsg();
-                msgIds.add(msg.getMessageId());
-                queryMsg.setMsgId(msg.getMessageId());
-                queryMsg.setOrderNo(msg.getOrderNo());
-                queryMsg.setLogAction(msg.getLogAction());
-                queryMsg.setOrder(msg.getData());
+                msgIds[i] = messages.get(i).getMessageId();
+                queryMsg.setMsgId(messages.get(i).getMessageId());
+                queryMsg.setOrderNo(messages.get(i).getOrderNo());
+                queryMsg.setLogAction(messages.get(i).getLogAction());
+                queryMsg.setOrder(messages.get(i).getData());
                 queryMsgList.add(queryMsg);
             }
-            log.info("[loopQuery] send result msgIds:{}", JSON.toJSONString(msgIds));
+            log.info("[loopQuery] send {} result msgIds:{}", uuid, Arrays.toString(msgIds));
         } catch (Exception e) {
             e.printStackTrace();
             log.info("[loopQuery] happen error :{}", e.getMessage());
@@ -71,8 +71,11 @@ public class MsgController {
     @PostMapping("ackMsg")
     public Result ackMsg(@RequestBody AckMsg ackMsg) {
         log.info("[ackMsg] msgIds:{}", ackMsg.getMsgIds().toArray());
+        if (CollectionUtils.isEmpty(ackMsg.getMsgIds())) {
+            return Result.ok();
+        }
         try {
-            boolean suc = kdsMsgService.confirmMsg(ackMsg.getMsgIds());
+            kdsMsgService.confirmMsg(ackMsg.getMsgIds());
         } catch (Exception e) {
             e.printStackTrace();
             log.info("[ackMsg] happen error:{}", e.getMessage());
@@ -82,14 +85,13 @@ public class MsgController {
     }
 
     @PostMapping("changeStatus")
-    public Result changeStatus(ChangeStatus changeStatus) {
-        List<OrderStatus> orderStatusList = changeStatus.getOrderStatuses();
-        log.info("[changeStatus] orderStatusList:{}", JSON.toJSONString(orderStatusList));
-        if (CollectionUtils.isEmpty(orderStatusList)) {
+    public Result changeStatus(@RequestBody ChangeStatus changeStatus) {
+        log.info("[changeStatus] orderStatuses:{}", JSON.toJSONString(changeStatus.getOrderStatuses()));
+        if (CollectionUtils.isEmpty(changeStatus.getOrderStatuses())) {
             return Result.ok();
         }
         try {
-            for (OrderStatus orderStatus : orderStatusList) {
+            for (OrderStatus orderStatus : changeStatus.getOrderStatuses()) {
                 orderMsgService.changeOrderStatus(orderStatus);
             }
         } catch (Exception e) {

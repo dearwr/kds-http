@@ -6,20 +6,23 @@ package com.hchc.kdshttp.constant;
  */
 public enum CookStatusEnum {
 
-    WAIT_COOK("WAIT_COOK", "ORDER_NEW", "待接单"),
-    COOKING("COOKING", "ORDER_MAKE", "制作中"),
-    COOKED("COOKED", "ORDER_TAKING", "制作完成"),
-    PICKED("PICKED", "ORDER_COMPLETE", "取餐完成"),
-    COMPLETE("COMPLETE", "ORDER_COMPLETE", "订单完成");
+    // 待接单
+    WAIT_COOK("WAIT_COOK", "ORDER_NEW"),
+    // 制作中
+    COOKING("COOKING", "ORDER_MAKE"),
+    // 制作完成
+    COOKED("COOKED", "ORDER_TAKING"),
+    // 取餐完成
+    PICKED("PICKED", "ORDER_COMPLETE"),
+    // 订单完成
+    COMPLETE("COMPLETE", "ORDER_COMPLETE");
 
     private String status;
     private String callAction;
-    private String name;
 
-    CookStatusEnum(String status, String callAction, String name) {
+    CookStatusEnum(String status, String callAction) {
         this.status = status;
         this.callAction = callAction;
-        this.name = name;
     }
 
     public static String getCallActionByStatus(String status) {

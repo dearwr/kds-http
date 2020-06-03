@@ -6,15 +6,15 @@ package com.hchc.kdshttp.constant;
  */
 public enum TogoEnum {
 
-    MEITUAN("MEITUAN", "美团"),
-    ELEME("ELEME", "饿了么");
+    // 美团
+    MEITUAN("MEITUAN"),
+    // 饿了么
+    ELEME("ELEME");
 
     private String type;
-    private String name;
 
-    TogoEnum(String type, String name) {
+    TogoEnum(String type) {
         this.type = type;
-        this.name = name;
     }
 
     public String getType() {

@@ -10,7 +10,7 @@ import java.util.Date;
  * @date 2020-06-02
  */
 @Data
-public class KdsOrder {
+public class TKdsOrder {
 
     private int id;
     private int hqId;

@@ -6,10 +6,14 @@ package com.hchc.kdshttp.constant;
  */
 public enum DeliveryStatusEnum {
 
-    NEW("NEW", "ORDER_NEW"),      // 新订单
-    DEFAULT("DEFAULT", "ORDER_MAKE"), // 等待配送
-    DELIVERYING("DELIVERYING", "ORDER_DELIVERYING"),  //配送中
-    DELIVERYED("DELIVERYED", "ORDER_COMPLETE");  // 配送成功
+    // 新订单
+    NEW("NEW", "ORDER_NEW"),
+    // 等待配送
+    DEFAULT("DEFAULT", "ORDER_MAKE"),
+    //配送中
+    DELIVERYING("DELIVERYING", "ORDER_DELIVERYING"),
+    // 配送成功
+    DELIVERYED("DELIVERYED", "ORDER_COMPLETE");
 
     private String status;
     private String callAction;

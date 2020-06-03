@@ -1,19 +1,13 @@
 package com.hchc.kdshttp.service;
 
 import com.hchc.kdshttp.dao.KdsMsgDao;
-import com.hchc.kdshttp.dao.KdsOrderDao;
-import com.hchc.kdshttp.entity.BranchKds;
 import com.hchc.kdshttp.entity.KdsMessage;
-import com.hchc.kdshttp.entity.KdsOrder;
-import com.hchc.kdshttp.mode.request.KdsInfo;
-import com.hchc.kdshttp.util.DatetimeUtil;
+import com.hchc.kdshttp.entity.TKdsOrder;
 import com.hchc.kdshttp.util.StringUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,15 +23,11 @@ import static com.hchc.kdshttp.constant.ActionEnum.*;
  * @date 2020-06-02
  */
 @Service
+@Slf4j
 public class KdsMsgService {
-
-    private static final Logger logger = LogManager.getLogger(KdsMsgService.class.getName());
 
     @Autowired
     private KdsMsgDao kdsMsgDao;
-
-    @Autowired
-    private KdsOrderDao kdsOrderDao;
 
     @Autowired
     private BranchKdsService branchKdsService;
@@ -56,14 +46,14 @@ public class KdsMsgService {
      *
      * @param tOrder        订单
      * @param uuidList      需要生成消息的uuid集合
-     * @param completedUUID 消息设置为推送完成的uuid
+     * @param completedUuid 消息设置为推送完成的uuid
      * @return
      */
-    public List<KdsMessage> createMsgByOrder(KdsOrder tOrder, List<String> uuidList, String completedUUID) {
+    public List<KdsMessage> createMsgByOrder(TKdsOrder tOrder, List<String> uuidList, String completedUuid) {
         if (CollectionUtils.isEmpty(uuidList)) {
             uuidList = branchKdsService.queryUUIDs(tOrder.getHqId(), tOrder.getBranchId());
             if (CollectionUtils.isEmpty(uuidList)) {
-                logger.info("[createMsgByOrder] not find uuid, no: {} , branchId:{}", tOrder.getNo(), tOrder.getBranchId());
+                log.info("[createMsgByOrder] not find uuid, no: {} , branchId:{}", tOrder.getNo(), tOrder.getBranchId());
                 return Collections.emptyList();
             }
         }
@@ -78,7 +68,7 @@ public class KdsMsgService {
             message.setUuid(uuid);
             message.setOrderNo(tOrder.getNo());
             message.setType(tOrder.getType());
-            if (uuid.equals(completedUUID)) {
+            if (uuid.equals(completedUuid)) {
                 message.setPushed(true);
                 message.setPushedTime(new Date());
             }
@@ -88,83 +78,15 @@ public class KdsMsgService {
     }
 
     /**
-     * 连接加载消息
-     *
-     * @param kdsInfo
-     * @return
-     */
-    public void bindKds(KdsInfo kdsInfo) {
-        String uuid = kdsInfo.getDeviceUUID();
-        BranchKds oldKds = branchKdsService.queryByUUID(uuid);
-        if (oldKds == null) {
-            logger.info("[loadMsgForConnect] create kds to db, uuid:{}", uuid);
-            BranchKds kds = new BranchKds();
-            kds.setHqId(kdsInfo.getHqId());
-            kds.setBranchId(kdsInfo.getBranchId());
-            kds.setUuid(kdsInfo.getDeviceUUID());
-            kds.setVersion(kdsInfo.getVersionCode());
-            branchKdsService.saveKds(kds);
-            createBranchMsg(kdsInfo);
-        } else {
-            int newHqId = kdsInfo.getHqId();
-            int newBranchId = kdsInfo.getBranchId();
-            oldKds.setOpen(true);
-            boolean versionChanged = judgeVersionChanged(oldKds, kdsInfo);
-            if (newHqId != oldKds.getHqId() || newBranchId != oldKds.getBranchId()) {
-                logger.info("[loadMsgForConnect] kds change hqId or branch, uuid:{}", uuid);
-                oldKds.setHqId(newHqId);
-                oldKds.setBranchId(newBranchId);
-                branchKdsService.update(oldKds);
-                Date end = new Date();
-                Date start = DatetimeUtil.dayBegin(end);
-                kdsMsgDao.updateInvalidMsg(newBranchId, uuid, start, end);
-                createBranchMsg(kdsInfo);
-            } else {
-                if (versionChanged) {
-                    branchKdsService.update(oldKds);
-                }
-            }
-        }
-    }
-
-    /**
-     * 判断版本号是否改变
-     *
-     * @param oldKds
-     * @param kdsInfo
-     */
-    private boolean judgeVersionChanged(BranchKds oldKds, KdsInfo kdsInfo) {
-        String newVersion = kdsInfo.getVersionCode();
-        if (!StringUtils.isEmpty(newVersion) && !newVersion.equals(oldKds.getVersion())) {
-            logger.info("[judgeVersionChanged] kds change version {} to {}, uuid:{}", oldKds.getVersion(), newVersion, oldKds.getUuid());
-            oldKds.setVersion(newVersion);
-            return true;
-        }
-        return false;
-    }
-
-    private void createBranchMsg(KdsInfo kdsInfo) {
-        Date end = new Date();
-        Date start = DatetimeUtil.dayBegin(end);
-        List<KdsOrder> orders = kdsOrderDao.queryUncompleted(kdsInfo.getHqId(), kdsInfo.getBranchId(), start, end);
-        List<KdsMessage> messages = new ArrayList<>();
-        for (KdsOrder order : orders) {
-            messages.addAll(createMsgByOrder(order, Collections.singletonList(kdsInfo.getDeviceUUID()), null));
-        }
-        kdsMsgDao.batchAdd(messages);
-    }
-
-    /**
      * 查询未读的消息
      * @param branchId
      * @param uuid
      * @param startTime
-     * @param endTime
      * @param size
      * @return
      */
-    public List<KdsMessage> queryUnPushedMsg(String branchId, String uuid, Date startTime, Date endTime, int size) {
-        return kdsMsgDao.queryUnPushed(branchId, uuid, startTime, endTime, size);
+    public List<KdsMessage> queryUnPushedMsg(String branchId, String uuid, Date startTime, int size) {
+        return kdsMsgDao.queryUnPushed(branchId, uuid, startTime, size);
     }
 
     /**
@@ -177,7 +99,7 @@ public class KdsMsgService {
     public KdsMessage queryOrderNewStatusMsg(String uuid, String orderNo) {
         List<KdsMessage> messages = kdsMsgDao.queryOrderMsg(uuid, orderNo);
         if (CollectionUtils.isEmpty(messages)) {
-            logger.info("[queryOrderNewStatusMsg] not find msg, uuid:{}, no:{}", uuid, orderNo);
+            log.info("[queryOrderNewStatusMsg] not find msg, uuid:{}, no:{}", uuid, orderNo);
             return null;
         }
         List<String> actions = messages.stream().map(KdsMessage::getLogAction).collect(Collectors.toList());
