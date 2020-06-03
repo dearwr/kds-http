@@ -35,6 +35,12 @@ public class MsgController {
     @Autowired
     private KdsMsgService kdsMsgService;
 
+    /**
+     * 轮询查订单
+     * @param branchId
+     * @param uuid
+     * @return
+     */
     @GetMapping("loopQuery")
     public Result loopQuery(String branchId, String uuid) {
         log.info("[loopQuery] param branchId:{}, uuid:{}", branchId, uuid);
@@ -68,6 +74,11 @@ public class MsgController {
         return Result.ok(queryMsgList);
     }
 
+    /**
+     * 消息确认
+     * @param ackMsg
+     * @return
+     */
     @PostMapping("ackMsg")
     public Result ackMsg(@RequestBody AckMsg ackMsg) {
         log.info("[ackMsg] msgIds:{}", ackMsg.getMsgIds().toArray());
@@ -84,6 +95,11 @@ public class MsgController {
         return Result.ok();
     }
 
+    /**
+     * 改变订单状态
+     * @param changeStatus
+     * @return
+     */
     @PostMapping("changeStatus")
     public Result changeStatus(@RequestBody ChangeStatus changeStatus) {
         log.info("[changeStatus] orderStatuses:{}", JSON.toJSONString(changeStatus.getOrderStatuses()));

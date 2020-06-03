@@ -36,7 +36,7 @@ public class OrderMsgService {
     private KdsOrderDao kdsOrderDao;
 
     /**
-     * 根据订单号更新订单状态并生成消息
+     * 更新订单状态
      *
      * @param order
      * @return

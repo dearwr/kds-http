@@ -39,9 +39,9 @@ public class KdsOrderDao {
         return jdbcTemplate.update(sql, params) > 0;
     }
 
-    public List<TKdsOrder> queryUncompleted(int hqId, int branchId, Date startTime, Date endTime) {
-        String sql = "select * from t_kds_order where f_hqid=? and f_branchid=? and f_completed=0 and f_create_time between ? and ?  ";
-        List<TKdsOrder> orders = jdbcTemplate.query(sql, this::queryMapping, hqId, branchId, startTime, endTime);
+    public List<TKdsOrder> queryUncompleted(int hqId, int branchId, Date startTime) {
+        String sql = "select * from t_kds_order where f_hqid=? and f_branchid=? and f_completed=0 and f_create_time > ? ";
+        List<TKdsOrder> orders = jdbcTemplate.query(sql, this::queryMapping, hqId, branchId, startTime);
         if (CollectionUtils.isEmpty(orders)) {
             return Collections.emptyList();
         }

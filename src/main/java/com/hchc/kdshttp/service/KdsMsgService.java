@@ -45,8 +45,8 @@ public class KdsMsgService {
      * 根据订单生成消息
      *
      * @param tOrder        订单
-     * @param uuidList      需要生成消息的uuid集合
-     * @param completedUuid 消息设置为推送完成的uuid
+     * @param uuidList      需要生成消息的uuid
+     * @param completedUuid 消息设置为完成的uuid
      * @return
      */
     public List<KdsMessage> createMsgByOrder(TKdsOrder tOrder, List<String> uuidList, String completedUuid) {
@@ -78,7 +78,7 @@ public class KdsMsgService {
     }
 
     /**
-     * 查询未读的消息
+     * 查询未推送成功的消息
      * @param branchId
      * @param uuid
      * @param startTime

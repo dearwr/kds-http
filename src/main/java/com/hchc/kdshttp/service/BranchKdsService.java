@@ -38,7 +38,7 @@ public class BranchKdsService {
     private KdsMsgService kdsMsgService;
 
     /**
-     * 连接加载消息
+     * 绑定kds
      *
      * @param kdsInfo
      * @return
@@ -93,10 +93,13 @@ public class BranchKdsService {
         return false;
     }
 
+    /**
+     * 门店未完成的订单创建该uuid设备消息
+     * @param kdsInfo
+     */
     private void createBranchMsg(KdsInfo kdsInfo) {
-        Date end = new Date();
-        Date start = DatetimeUtil.dayBegin(end);
-        List<TKdsOrder> orders = kdsOrderDao.queryUncompleted(kdsInfo.getHqId(), kdsInfo.getBranchId(), start, end);
+        Date start = DatetimeUtil.dayBegin(new Date());
+        List<TKdsOrder> orders = kdsOrderDao.queryUncompleted(kdsInfo.getHqId(), kdsInfo.getBranchId(), start);
         List<KdsMessage> messages = new ArrayList<>();
         for (TKdsOrder order : orders) {
             messages.addAll(kdsMsgService.createMsgByOrder(order, Collections.singletonList(kdsInfo.getDeviceUUID()), null));

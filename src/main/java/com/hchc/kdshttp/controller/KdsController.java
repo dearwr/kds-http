@@ -18,11 +18,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/kds")
 @Slf4j
-public class KdsBindController {
+public class KdsController {
 
     @Autowired
     private BranchKdsService branchKdsService;
 
+    /**
+     * kds绑定
+     * @param kdsInfo
+     * @return
+     */
     @PostMapping("/bind")
     public Result bind(@RequestBody KdsInfo kdsInfo) {
         log.info("[bind] param :{}", JSON.toJSONString(kdsInfo));
