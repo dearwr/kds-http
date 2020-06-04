@@ -1,8 +1,8 @@
 package com.hchc.kdshttp.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.hchc.kdshttp.entity.KdsMessage;
 import com.hchc.kdshttp.mode.request.AckMsg;
-import com.hchc.kdshttp.mode.request.ChangeStatus;
 import com.hchc.kdshttp.mode.request.OrderStatus;
 import com.hchc.kdshttp.mode.request.QueryUnit;
 import com.hchc.kdshttp.mode.response.QueryMsg;
@@ -92,25 +92,40 @@ public class MsgController {
     /**
      * 改变订单状态
      *
-     * @param changeStatus
+     * @param orderStatus
      * @return
      */
     @PostMapping("changeStatus")
-    public Result changeStatus(@RequestBody ChangeStatus changeStatus) {
-        log.info("[changeStatus] orderStatuses:{}", JSON.toJSONString(changeStatus.getOrderStatuses()));
-        if (CollectionUtils.isEmpty(changeStatus.getOrderStatuses())) {
-            return Result.ok();
+    public Result changeStatus(@RequestBody OrderStatus orderStatus) {
+        log.info("[changeStatus] orderStatus:{}", JSON.toJSONString(orderStatus));
+        if (orderStatus == null) {
+            return Result.fail("param is empty");
         }
         try {
-            for (OrderStatus orderStatus : changeStatus.getOrderStatuses()) {
-                orderMsgService.changeOrderStatus(orderStatus);
-            }
+            orderMsgService.changeOrderStatus(orderStatus);
         } catch (Exception e) {
             e.printStackTrace();
             log.info("[changeStatus] happen error:{}", e.getMessage());
             return Result.fail(e);
         }
         return Result.ok();
+    }
+
+    /**
+     * 获取订单状态
+     *
+     * @param uuid
+     * @param orderNo
+     * @return
+     */
+    @GetMapping("/fetchOrderStatus")
+    public Result fetchOrderStatus(String uuid, String orderNo) {
+        log.info("[fetchOrderStatus] param orderNo:{}, uuid:{}", orderNo, uuid);
+        KdsMessage newMsg = kdsMsgService.queryNewOrderMsg(uuid, orderNo);
+        if (newMsg != null) {
+            return Result.ok(newMsg.getData());
+        }
+        return Result.fail("not find order msg");
     }
 
 }

@@ -25,7 +25,8 @@ public class TaskManager {
     private KdsMsgDao kdsMsgDao;
 
     private static final int QUERY_TASK_COUNT = 10;
-    private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(10);
+    private static final ExecutorService QUERY_EXECUTOR = new ThreadPoolExecutor(10, 10, 60, TimeUnit.SECONDS,
+            new LinkedBlockingDeque<>(), new CustomerThreadFactory("query"));
 
     private static final Map<String, List<QueryMsg>> QUERY_DATA = new ConcurrentHashMap<>();
     private static final Map<String, QueryUnit> WAIT_UNIT = new ConcurrentHashMap<>();
@@ -36,7 +37,7 @@ public class TaskManager {
         log.info("TaskManager init");
         // 初始化多个查询任务
         for (int i = 1; i <= QUERY_TASK_COUNT; i++) {
-            EXECUTOR.submit(new QueryMsgTask(kdsMsgDao, i));
+            QUERY_EXECUTOR.submit(new QueryMsgTask(kdsMsgDao));
         }
     }
 
@@ -46,10 +47,15 @@ public class TaskManager {
 
     public static void putQueryData(String uuid, List<QueryMsg> queryData) {
         QUERY_DATA.put(uuid, queryData);
+
     }
 
     public static void removeQueryData(String uuid) {
         QUERY_DATA.remove(uuid);
+    }
+
+    public static void removeWaitUnit(String uuid) {
+        WAIT_UNIT.remove(uuid);
     }
 
     public static void tryRegisterQueryUnit(String uuid, QueryUnit newUnit) {
@@ -66,6 +72,7 @@ public class TaskManager {
     @PreDestroy
     public void shutdown() {
         log.info("TaskManager shutdown");
+        QUERY_EXECUTOR.shutdown();
     }
 
 }

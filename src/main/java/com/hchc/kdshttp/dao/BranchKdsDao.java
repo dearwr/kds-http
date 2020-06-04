@@ -35,11 +35,6 @@ public class BranchKdsDao {
         return jdbcTemplate.update(sql, kds.getName(), kds.getHqId(), kds.getBranchId(), kds.isOpen(), kds.getOffLineTime(), new Date(), kds.getVersion(), kds.getUuid()) > 0;
     }
 
-    public boolean updateHeartTime(Date heartTime, String uuid) {
-        String sql = "update t_branch_kds set f_heart_time=? where f_uuid=?";
-        return jdbcTemplate.update(sql, heartTime, uuid) > 0;
-    }
-
     public BranchKds query(String uuid) {
         String sql = "select * from t_branch_kds where f_uuid=? ";
         List<BranchKds> kdsList = jdbcTemplate.query(sql, this::queryMapping, uuid);

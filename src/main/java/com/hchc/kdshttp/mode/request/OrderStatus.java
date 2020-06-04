@@ -16,4 +16,5 @@ public class OrderStatus {
     private String orderNo;
 
     private String logAction;
+
 }

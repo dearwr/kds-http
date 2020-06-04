@@ -8,28 +8,26 @@ import java.util.*;
  */
 public enum ActionEnum {
     // 新订单
-    ORDER_NEW("ORDER_NEW", "ORDER_NEW", CmdType.SYNC_NEW_REFUND),
+    ORDER_NEW("ORDER_NEW", "ORDER_NEW"),
     // 预点单
-    ORDER_PRE("ORDER_PRE", "ORDER_PRE", CmdType.SYNC_NEW_REFUND),
+    ORDER_PRE("ORDER_PRE", "ORDER_PRE"),
     // 制作中
-    ORDER_MAKE("ORDER_MAKE", "ORDER_MAKE", CmdType.SYNC_COOK_STATUE),
+    ORDER_MAKE("ORDER_MAKE", "ORDER_MAKE"),
     // 制作完成
-    ORDER_TAKING("ORDER_TAKING", "ORDER_CALL", CmdType.SYNC_COOK_STATUE),
+    ORDER_TAKING("ORDER_TAKING", "ORDER_CALL"),
     // 订单配送中
-    ORDER_DELIVERYING("ORDER_DELIVERYING", "ORDER_DELIVERYING", CmdType.SYNC_COOK_STATUE),
+    ORDER_DELIVERYING("ORDER_DELIVERYING", "ORDER_DELIVERYING"),
     // 取餐完成
-    ORDER_COMPLETE("ORDER_COMPLETE", "TAKE_COMPLETE", CmdType.SYNC_COOK_STATUE),
+    ORDER_COMPLETE("ORDER_COMPLETE", "TAKE_COMPLETE"),
     // 已退单
-    ORDER_REFUND("ORDER_REFUND", "ORDER_REFUND", CmdType.SYNC_NEW_REFUND);
+    ORDER_REFUND("ORDER_REFUND", "ORDER_REFUND");
 
     private String callAction;
     private String logAction;
-    private int cmd;
 
-    ActionEnum(String callAction, String logAction, int cmd) {
+    ActionEnum(String callAction, String logAction) {
         this.callAction = callAction;
         this.logAction = logAction;
-        this.cmd = cmd;
     }
 
     public String getLogAction() {
@@ -38,10 +36,6 @@ public enum ActionEnum {
 
     public String getCallAction() {
         return callAction;
-    }
-
-    public int getCmd() {
-        return cmd;
     }
 
     public static String getLogActionByCallAction(String callAction) {
@@ -60,25 +54,6 @@ public enum ActionEnum {
             }
         }
         return ORDER_NEW.getCallAction();
-    }
-
-    public static int getCmdByLogAction(String logAction) {
-        for (ActionEnum action : values()) {
-            if (action.getLogAction().equals(logAction)) {
-                return action.getCmd();
-            }
-        }
-        return -1;
-    }
-
-    /**
-     * 中间状态logAction
-     */
-    public static final List<String> MID_STATUS_ACTION_LIST = new ArrayList<>();
-
-    static {
-        MID_STATUS_ACTION_LIST.add("ORDER_MAKE");
-        MID_STATUS_ACTION_LIST.add("ORDER_CALL");
     }
 
     /**

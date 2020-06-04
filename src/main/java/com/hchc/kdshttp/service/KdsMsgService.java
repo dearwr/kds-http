@@ -13,9 +13,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.hchc.kdshttp.constant.ActionEnum.*;
 
 
 /**
@@ -34,6 +31,7 @@ public class KdsMsgService {
 
     /**
      * 确认消息接收
+     *
      * @param msgIds
      * @return
      */
@@ -84,37 +82,13 @@ public class KdsMsgService {
      * @param orderNo
      * @return
      */
-    public KdsMessage queryOrderNewStatusMsg(String uuid, String orderNo) {
-        List<KdsMessage> messages = kdsMsgDao.queryOrderMsg(uuid, orderNo);
+    public KdsMessage queryNewOrderMsg(String uuid, String orderNo) {
+        List<KdsMessage> messages = kdsMsgDao.queryNewOrderMsg(uuid, orderNo);
         if (CollectionUtils.isEmpty(messages)) {
-            log.info("[queryOrderNewStatusMsg] not find msg, uuid:{}, no:{}", uuid, orderNo);
+            log.info("[queryNewOrderMsg] not find msg, uuid:{}, no:{}", uuid, orderNo);
             return null;
         }
-        List<String> actions = messages.stream().map(KdsMessage::getLogAction).collect(Collectors.toList());
-        if (actions.contains(ORDER_REFUND.getLogAction())) {
-            return getMsgByAction(ORDER_REFUND.getLogAction(), messages);
-        } else if (actions.contains(ORDER_COMPLETE.getLogAction())) {
-            return getMsgByAction(ORDER_COMPLETE.getLogAction(), messages);
-        } else if (actions.contains(ORDER_DELIVERYING.getLogAction())) {
-            return getMsgByAction(ORDER_DELIVERYING.getLogAction(), messages);
-        } else if (actions.contains(ORDER_TAKING.getLogAction())) {
-            return getMsgByAction(ORDER_TAKING.getLogAction(), messages);
-        } else if (actions.contains(ORDER_MAKE.getLogAction())) {
-            return getMsgByAction(ORDER_MAKE.getLogAction(), messages);
-        } else if (actions.contains(ORDER_PRE.getLogAction())) {
-            return getMsgByAction(ORDER_PRE.getLogAction(), messages);
-        } else {
-            return getMsgByAction(ORDER_NEW.getLogAction(), messages);
-        }
-    }
-
-    private KdsMessage getMsgByAction(String action, List<KdsMessage> messages) {
-        for (KdsMessage msg : messages) {
-            if (action.equals(msg.getLogAction())) {
-                return msg;
-            }
-        }
-        return null;
+        return messages.get(0);
     }
 
 }

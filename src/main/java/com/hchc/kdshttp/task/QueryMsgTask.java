@@ -21,16 +21,12 @@ public class QueryMsgTask implements Runnable {
 
     private KdsMsgDao kdsMsgDao;
 
-    private String taskName;
-
-    public QueryMsgTask(KdsMsgDao kdsMsgDao, int number) {
+    public QueryMsgTask(KdsMsgDao kdsMsgDao) {
         this.kdsMsgDao = kdsMsgDao;
-        this.taskName = "QueryMsgTask-" + number;
     }
 
     @Override
     public void run() {
-        log.info("[{}] start run", taskName);
         List<KdsMessage> messages;
         List<QueryMsg> queryMsgList;
         QueryMsg queryMsg;
@@ -43,9 +39,9 @@ public class QueryMsgTask implements Runnable {
                     Thread.sleep(100);
                     continue;
                 }
-                log.info("[{}]query {} {} start", taskName, queryUnit.getBranchId(), queryUnit.getUuid());
+                log.info("query {} {} start", queryUnit.getBranchId(), queryUnit.getUuid());
                 startTime = DatetimeUtil.dayBegin(new Date());
-                messages = kdsMsgDao.queryUnPushed(queryUnit.getBranchId(), queryUnit.getUuid(), startTime, -1);
+                messages = kdsMsgDao.queryUnPushed(queryUnit.getBranchId(), queryUnit.getUuid(), startTime, 30);
                 queryMsgList = new ArrayList<>(messages.size());
                 for (KdsMessage msg : messages) {
                     queryMsg = new QueryMsg();
@@ -56,10 +52,11 @@ public class QueryMsgTask implements Runnable {
                     queryMsgList.add(queryMsg);
                 }
                 TaskManager.putQueryData(queryUnit.getUuid(), queryMsgList);
-                log.info("[{}]query {} {} end", taskName, queryUnit.getBranchId(), queryUnit.getUuid());
+                TaskManager.removeWaitUnit(queryUnit.getUuid());
+                log.info("query {} {} end", queryUnit.getBranchId(), queryUnit.getUuid());
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                log.info("[{}] happen error:{}", taskName, e.getMessage());
+                log.info("happen error:{}", e.getMessage());
             }
         }
     }

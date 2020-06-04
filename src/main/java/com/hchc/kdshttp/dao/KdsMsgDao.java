@@ -100,14 +100,9 @@ public class KdsMsgDao {
         return tkm;
     }
 
-    public List<KdsMessage> queryOrderMsg(String uuid, String orderNo) {
+    public List<KdsMessage> queryNewOrderMsg(String uuid, String orderNo) {
         String sql = "select * from t_kds_message where f_uuid = ? and f_order_no = ? order by f_create_time desc ";
         return jdbcTemplate.query(sql, this::queryMapping, uuid, orderNo);
-    }
-
-    public int deleteBeforeTime(Date endTime) {
-        String sql = "delete from t_kds_message where f_create_time < ?";
-        return jdbcTemplate.update(sql, endTime);
     }
 
 }

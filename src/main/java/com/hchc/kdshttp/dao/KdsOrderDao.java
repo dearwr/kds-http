@@ -22,15 +22,6 @@ public class KdsOrderDao {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public boolean save(TKdsOrder tko) {
-        String sql = "insert into t_kds_order(f_hqid, f_branchid, f_no, f_grade, f_data, f_type, f_log_action, f_completed, f_create_time, f_update_time) " +
-                "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        Object[] Params = new Object[]{
-                tko.getHqId(), tko.getBranchId(), tko.getNo(), tko.getGrade(), tko.getData(), tko.getType(), tko.getLogAction(), tko.isCompleted(), tko.getCreateTime(), tko.getUpdateTime()
-        };
-        return jdbcTemplate.update(sql, Params) > 0;
-    }
-
     public boolean updateOrder(TKdsOrder tko) {
         String sql = "update t_kds_order set f_log_action=?, f_data=?, f_completed=?, f_update_time=? where f_id=? ";
         Object[] params = new Object[]{
@@ -55,11 +46,6 @@ public class KdsOrderDao {
             return null;
         }
         return orders.get(0);
-    }
-
-    public int deleteBeforeTime(Date endTime) {
-        String sql = "delete from t_kds_order where f_create_time < ?";
-        return jdbcTemplate.update(sql, endTime);
     }
 
     private TKdsOrder queryMapping(ResultSet rs, int i) throws SQLException {
