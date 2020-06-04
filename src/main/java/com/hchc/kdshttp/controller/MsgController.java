@@ -4,12 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.hchc.kdshttp.mode.request.AckMsg;
 import com.hchc.kdshttp.mode.request.ChangeStatus;
 import com.hchc.kdshttp.mode.request.OrderStatus;
-import com.hchc.kdshttp.mode.request.QueryParam;
+import com.hchc.kdshttp.mode.request.QueryUnit;
 import com.hchc.kdshttp.mode.response.QueryMsg;
 import com.hchc.kdshttp.pack.Result;
 import com.hchc.kdshttp.service.KdsMsgService;
 import com.hchc.kdshttp.service.OrderMsgService;
-import com.hchc.kdshttp.task.Task;
+import com.hchc.kdshttp.task.TaskManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
@@ -48,16 +48,17 @@ public class MsgController {
         }
         List<QueryMsg> queryData;
         try {
-            queryData = Task.QUERY_DATA.get(uuid);
+            queryData = TaskManager.fetchQueryData(uuid);
             if (queryData != null) {
-                Task.QUERY_DATA.remove(uuid);
+                TaskManager.removeQueryData(uuid);
                 String[] msgIds = new String[queryData.size()];
                 for (int i = 0; i < queryData.size(); i++) {
                     msgIds[i] = queryData.get(i).getMsgId();
                 }
-                log.info("[loopQuery] {} {} query msgIds:{}", branchId, uuid, Arrays.toString(msgIds));
+                log.info("[loopQuery] {} {} send query msgIds:{}", branchId, uuid, Arrays.toString(msgIds));
             }
-            Task.WORKER_QUEUE.offer(new QueryParam(branchId, uuid));
+            QueryUnit newUnit = new QueryUnit(branchId, uuid);
+            TaskManager.tryRegisterQueryUnit(uuid, newUnit);
         } catch (Exception e) {
             e.printStackTrace();
             log.info("[loopQuery] happen error:{}", e.getMessage());

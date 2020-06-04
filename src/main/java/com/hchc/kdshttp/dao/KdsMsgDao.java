@@ -2,8 +2,6 @@ package com.hchc.kdshttp.dao;
 
 import com.hchc.kdshttp.entity.KdsMessage;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;

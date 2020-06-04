@@ -9,13 +9,13 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class QueryParam {
+public class QueryUnit {
 
     private String branchId;
 
     private String uuid;
 
-    public QueryParam(String branchId, String uuid) {
+    public QueryUnit(String branchId, String uuid) {
         this.branchId = branchId;
         this.uuid = uuid;
     }
