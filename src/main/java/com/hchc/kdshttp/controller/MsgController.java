@@ -121,7 +121,7 @@ public class MsgController {
     @GetMapping("/fetchOrderStatus")
     public Result fetchOrderStatus(String uuid, String orderNo) {
         log.info("[fetchOrderStatus] param orderNo:{}, uuid:{}", orderNo, uuid);
-        KdsMessage newMsg = kdsMsgService.queryNewOrderMsg(uuid, orderNo);
+        KdsMessage newMsg = kdsMsgService.queryOrderNewMsg(uuid, orderNo);
         if (newMsg != null) {
             return Result.ok(newMsg.getData());
         }
