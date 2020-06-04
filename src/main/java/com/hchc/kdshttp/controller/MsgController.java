@@ -40,9 +40,9 @@ public class MsgController {
      * @return
      */
     @GetMapping("loopQuery")
-    public Result loopQuery(String branchId, String uuid) {
+    public Result loopQuery(long branchId, String uuid) {
         log.info("[loopQuery] param branchId:{}, uuid:{}", branchId, uuid);
-        if (StringUtils.isEmpty(branchId) || StringUtils.isEmpty(uuid)) {
+        if (branchId <= 0 || StringUtils.isEmpty(uuid)) {
             log.info("[loopQuery] param exist empty");
             return Result.fail("param exist empty");
         }

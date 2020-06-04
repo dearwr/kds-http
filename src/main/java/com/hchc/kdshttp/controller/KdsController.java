@@ -25,16 +25,17 @@ public class KdsController {
 
     /**
      * kds绑定
+     *
      * @param kdsInfo
      * @return
      */
     @PostMapping("/bind")
     public Result bind(@RequestBody KdsInfo kdsInfo) {
-        log.info("[bind] param :{}", JSON.toJSONString(kdsInfo));
-        if (kdsInfo == null) {
-            return Result.fail("param exit empty");
-        }
         try {
+            log.info("[bind] param :{}", JSON.toJSONString(kdsInfo));
+            if (kdsInfo == null) {
+                return Result.fail("param exit empty");
+            }
             branchKdsService.bindKds(kdsInfo);
         } catch (Exception e) {
             e.printStackTrace();
@@ -43,4 +44,5 @@ public class KdsController {
         }
         return Result.ok();
     }
+
 }

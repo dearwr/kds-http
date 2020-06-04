@@ -11,11 +11,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class QueryUnit {
 
-    private String branchId;
+    private long branchId;
 
     private String uuid;
 
-    public QueryUnit(String branchId, String uuid) {
+    public QueryUnit(long branchId, String uuid) {
         this.branchId = branchId;
         this.uuid = uuid;
     }

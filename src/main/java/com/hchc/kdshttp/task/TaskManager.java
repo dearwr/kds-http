@@ -34,7 +34,7 @@ public class TaskManager {
     @PostConstruct
     public void init() {
         log.info("TaskManager init");
-        // 初始化多个数据查询任务
+        // 初始化多个查询任务
         for (int i = 1; i <= QUERY_TASK_COUNT; i++) {
             EXECUTOR.submit(new QueryMsgTask(kdsMsgDao, i));
         }

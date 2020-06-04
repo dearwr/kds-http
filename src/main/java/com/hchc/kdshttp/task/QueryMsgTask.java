@@ -34,18 +34,18 @@ public class QueryMsgTask implements Runnable {
         List<KdsMessage> messages;
         List<QueryMsg> queryMsgList;
         QueryMsg queryMsg;
-        QueryUnit queryUNIT;
+        QueryUnit queryUnit;
         Date startTime;
         while (true) {
             try {
-                queryUNIT = TaskManager.fetchWorkQueue().poll(5, TimeUnit.SECONDS);
-                if (queryUNIT == null) {
+                queryUnit = TaskManager.fetchWorkQueue().poll(5, TimeUnit.SECONDS);
+                if (queryUnit == null) {
                     Thread.sleep(100);
                     continue;
                 }
-                log.info("[{}] {} {} query start", taskName, queryUNIT.getBranchId(), queryUNIT.getUuid());
+                log.info("[{}]query {} {} start", taskName, queryUnit.getBranchId(), queryUnit.getUuid());
                 startTime = DatetimeUtil.dayBegin(new Date());
-                messages = kdsMsgDao.queryUnPushed(queryUNIT.getBranchId(), queryUNIT.getUuid(), startTime, -1);
+                messages = kdsMsgDao.queryUnPushed(queryUnit.getBranchId(), queryUnit.getUuid(), startTime, -1);
                 queryMsgList = new ArrayList<>(messages.size());
                 for (KdsMessage msg : messages) {
                     queryMsg = new QueryMsg();
@@ -55,8 +55,8 @@ public class QueryMsgTask implements Runnable {
                     queryMsg.setOrder(msg.getData());
                     queryMsgList.add(queryMsg);
                 }
-                TaskManager.putQueryData(queryUNIT.getUuid(), queryMsgList);
-                log.info("[{}] {} {} query end", taskName, queryUNIT.getBranchId(), queryUNIT.getUuid());
+                TaskManager.putQueryData(queryUnit.getUuid(), queryMsgList);
+                log.info("[{}]query {} {} end", taskName, queryUnit.getBranchId(), queryUnit.getUuid());
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 log.info("[{}] happen error:{}", taskName, e.getMessage());

@@ -65,10 +65,10 @@ public class KdsMsgDao {
     }
 
 
-    public List<KdsMessage> queryUnPushed(String branchId, String uuid, Date startTime, int size) {
+    public List<KdsMessage> queryUnPushed(long branchId, String uuid, Date startTime, int size) {
         StringBuilder sql = new StringBuilder("select f_message_id, f_order_no, f_log_action, f_data from t_kds_message where f_status=1 and f_push_status=0 ");
         List<Object> paramList = new ArrayList<>();
-        if (branchId != null) {
+        if (branchId > 0) {
             sql.append(" and f_branchid=? ");
             paramList.add(branchId);
         }
