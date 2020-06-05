@@ -82,11 +82,11 @@ public class KdsMsgService {
      * @param orderNo
      * @return
      */
-    public KdsMessage queryOrderNewMsg(String uuid, String orderNo) {
+    public KdsMessage queryOrderNewMsg(String uuid, String orderNo) throws Exception {
         List<KdsMessage> messages = kdsMsgDao.queryNewOrderMsg(uuid, orderNo);
         if (CollectionUtils.isEmpty(messages)) {
-            log.info("[queryOrderNewMsg] not find msg, uuid:{}, no:{}", uuid, orderNo);
-            return null;
+            log.info("[queryOrderNewMsg] not find order msg, uuid:{}, no:{}", uuid, orderNo);
+            throw new Exception("not find order msg");
         }
         return messages.get(0);
     }

@@ -25,59 +25,54 @@ public class TaskManager {
     private KdsMsgDao kdsMsgDao;
 
     private static final int QUERY_TASK_COUNT = 10;
-    private static final ExecutorService QUERY_EXECUTOR = new ThreadPoolExecutor(10, 10, 60, TimeUnit.SECONDS,
-            new LinkedBlockingDeque<>(), new CustomerThreadFactory("query"));
+    private static final ExecutorService QUERY_THREAD_POOL = new ThreadPoolExecutor(10, 10,
+            60, TimeUnit.SECONDS, new LinkedBlockingDeque<>(), new CustomerThreadFactory("query"));
 
     private static final Map<String, List<QueryMsg>> QUERY_DATA = new ConcurrentHashMap<>();
-    private static final Map<String, QueryUnit> WAIT_UNIT = new ConcurrentHashMap<>();
-    private static final BlockingQueue<QueryUnit> WORKER_QUEUE = new LinkedBlockingQueue<>();
+    private static final Map<String, QueryUnit> WAIT_QUERY = new ConcurrentHashMap<>();
+    private static final BlockingQueue<QueryUnit> QUERY_QUEUE = new LinkedBlockingQueue<>();
 
     @PostConstruct
     public void init() {
         log.info("TaskManager init");
         // 初始化多个查询任务
-        for (int i = 1; i <= QUERY_TASK_COUNT; i++) {
-            QUERY_EXECUTOR.submit(new QueryMsgTask(kdsMsgDao));
+        for (int i = 0; i < QUERY_TASK_COUNT; i++) {
+            QUERY_THREAD_POOL.submit(new QueryMsgTask(kdsMsgDao));
         }
     }
 
-    public static List<QueryMsg> fetchQueryData(String uuid) {
+    public static List<QueryMsg> fetchData(String uuid) {
         return QUERY_DATA.get(uuid);
     }
 
-    public static void putQueryData(String uuid, List<QueryMsg> queryData) {
+    public static void setQueryData(String uuid, List<QueryMsg> queryData) {
         QUERY_DATA.put(uuid, queryData);
 
     }
 
-    public static void removeQueryData(String uuid) {
+    public static void removeData(String uuid) {
         QUERY_DATA.remove(uuid);
     }
 
-    public static void removeWaitUnit(String uuid) {
-        WAIT_UNIT.remove(uuid);
+    public static void removeWait(String uuid) {
+        WAIT_QUERY.remove(uuid);
     }
 
-    public static void tryRegisterQueryUnit(String uuid, QueryUnit newUnit) {
-        QueryUnit oldUnit = WAIT_UNIT.putIfAbsent(uuid, newUnit);
+    public static void tryRegisterQuery(String uuid, QueryUnit newUnit) {
+        QueryUnit oldUnit = WAIT_QUERY.putIfAbsent(uuid, newUnit);
         if (oldUnit == null) {
-            WORKER_QUEUE.offer(newUnit);
+            QUERY_QUEUE.offer(newUnit);
         }
     }
 
     public static BlockingQueue<QueryUnit> fetchWorkQueue() {
-        return WORKER_QUEUE;
+        return QUERY_QUEUE;
     }
 
     @PreDestroy
     public void shutdown() {
         log.info("TaskManager shutdown");
-        QUERY_EXECUTOR.shutdown();
-    }
-
-    public static void main(String[] args) {
-        TaskManager taskManager = new TaskManager();
-        taskManager.init();
+        QUERY_THREAD_POOL.shutdown();
     }
 
 }

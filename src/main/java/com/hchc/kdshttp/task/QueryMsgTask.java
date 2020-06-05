@@ -35,12 +35,12 @@ public class QueryMsgTask implements Runnable {
         Date startTime;
         while (true) {
             try {
-                queryUnit = TaskManager.fetchWorkQueue().poll(5, TimeUnit.SECONDS);
+                queryUnit = TaskManager.fetchWorkQueue().poll(1, TimeUnit.SECONDS);
                 if (queryUnit == null) {
                     Thread.sleep(100);
                     continue;
                 }
-                log.info("query {} {} start", queryUnit.getBranchId(), queryUnit.getUuid());
+                log.info("[QueryMsgTask] {} {} start query", queryUnit.getBranchId(), queryUnit.getUuid());
                 startTime = DatetimeUtil.dayBegin(new Date());
                 messages = kdsMsgDao.queryUnPushed(queryUnit.getBranchId(), queryUnit.getUuid(), startTime, 30);
                 queryMsgList = new ArrayList<>(messages.size());
@@ -52,12 +52,12 @@ public class QueryMsgTask implements Runnable {
                     queryMsg.setOrder(msg.getData());
                     queryMsgList.add(queryMsg);
                 }
-                TaskManager.putQueryData(queryUnit.getUuid(), queryMsgList);
-                TaskManager.removeWaitUnit(queryUnit.getUuid());
-                log.info("query {} {} end", queryUnit.getBranchId(), queryUnit.getUuid());
+                TaskManager.setQueryData(queryUnit.getUuid(), queryMsgList);
+                TaskManager.removeWait(queryUnit.getUuid());
+                log.info("[QueryMsgTask] {} {} end query", queryUnit.getBranchId(), queryUnit.getUuid());
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                log.info("happen error:{}", e.getMessage());
+                log.info("[QueryMsgTask]happen error:{}", e.getMessage());
             }
         }
     }

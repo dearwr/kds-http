@@ -39,17 +39,17 @@ public class OrderMsgService {
      * @param order
      * @return
      */
-    public void changeOrderStatus(OrderStatus order) {
+    public void changeOrderStatus(OrderStatus order) throws Exception {
         TKdsOrder tOrder = kdsOrderDao.query(order.getOrderNo());
         if (tOrder == null) {
             log.info("[getMsgByOrderNo] not find order :{}", order.getOrderNo());
-            return;
+            throw new Exception("not find order");
         }
         String newLogAction = ActionEnum.getLogActionByCallAction(order.getLogAction());
         updateOrder(order.getUuid(), tOrder, newLogAction);
     }
 
-    private void updateOrder(String uuid, TKdsOrder tOrder, String newLogAction) {
+    private void updateOrder(String uuid, TKdsOrder tOrder, String newLogAction) throws Exception {
         String oldLogAction = tOrder.getLogAction();
         // 检查传入的新状态是否有效
         List<String> validLogActions = ActionEnum.VALID_LOG_ACTION_MAP.get(oldLogAction);
@@ -66,7 +66,7 @@ public class OrderMsgService {
             createMsg(uuid, tOrder);
         } else {
             log.info("[updateOrder] {} check logAction is valid, oldAction:{}, newAction:{}", tOrder.getNo(), oldLogAction, newLogAction);
-            return;
+            throw new Exception("check logAction is valid");
         }
     }
 

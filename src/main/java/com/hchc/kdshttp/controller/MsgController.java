@@ -41,24 +41,24 @@ public class MsgController {
      */
     @GetMapping("loopQuery")
     public Result loopQuery(long branchId, String uuid) {
-        log.info("[loopQuery] param branchId:{}, uuid:{}", branchId, uuid);
+        log.info("[loopQuery] recv branchId:{}, uuid:{}", branchId, uuid);
         if (branchId <= 0 || StringUtils.isEmpty(uuid)) {
             log.info("[loopQuery] param exist empty");
             return Result.fail("param exist empty");
         }
         List<QueryMsg> queryData;
         try {
-            queryData = TaskManager.fetchQueryData(uuid);
+            queryData = TaskManager.fetchData(uuid);
             if (queryData != null) {
-                TaskManager.removeQueryData(uuid);
+                TaskManager.removeData(uuid);
                 String[] msgIds = new String[queryData.size()];
                 for (int i = 0; i < queryData.size(); i++) {
                     msgIds[i] = queryData.get(i).getMsgId();
                 }
-                log.info("[loopQuery] {} {} send query msgIds:{}", branchId, uuid, Arrays.toString(msgIds));
+                log.info("[loopQuery] send {} {} query msgIds:{}", branchId, uuid, Arrays.toString(msgIds));
             }
             QueryUnit newUnit = new QueryUnit(branchId, uuid);
-            TaskManager.tryRegisterQueryUnit(uuid, newUnit);
+            TaskManager.tryRegisterQuery(uuid, newUnit);
         } catch (Exception e) {
             e.printStackTrace();
             log.info("[loopQuery] happen error:{}", e.getMessage());
@@ -75,7 +75,7 @@ public class MsgController {
      */
     @PostMapping("ackMsg")
     public Result ackMsg(@RequestBody AckMsg ackMsg) {
-        log.info("[ackMsg] msgIds:{}", ackMsg.getMsgIds().toArray());
+        log.info("[ackMsg] recv msgIds:{}", ackMsg.getMsgIds().toArray());
         if (CollectionUtils.isEmpty(ackMsg.getMsgIds())) {
             return Result.ok();
         }
@@ -97,7 +97,7 @@ public class MsgController {
      */
     @PostMapping("changeStatus")
     public Result changeStatus(@RequestBody OrderStatus orderStatus) {
-        log.info("[changeStatus] orderStatus:{}", JSON.toJSONString(orderStatus));
+        log.info("[changeStatus] recv orderStatus:{}", JSON.toJSONString(orderStatus));
         if (orderStatus == null) {
             return Result.fail("param is empty");
         }
@@ -120,12 +120,19 @@ public class MsgController {
      */
     @GetMapping("/fetchOrderStatus")
     public Result fetchOrderStatus(String uuid, String orderNo) {
-        log.info("[fetchOrderStatus] param orderNo:{}, uuid:{}", orderNo, uuid);
-        KdsMessage newMsg = kdsMsgService.queryOrderNewMsg(uuid, orderNo);
-        if (newMsg != null) {
-            return Result.ok(newMsg.getData());
+        log.info("[fetchOrderStatus] recv orderNo:{}, uuid:{}", orderNo, uuid);
+        KdsMessage newMsg;
+        try {
+            newMsg = kdsMsgService.queryOrderNewMsg(uuid, orderNo);
+            if (newMsg == null) {
+                return Result.fail("not find order msg");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("[fetchOrderStatus] happen error:{}", e.getMessage());
+            return Result.fail(e);
         }
-        return Result.fail("not find order msg");
+        return Result.ok(newMsg.getData());
     }
 
 }
