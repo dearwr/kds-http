@@ -106,7 +106,7 @@ public class MsgController {
         } catch (Exception e) {
             e.printStackTrace();
             log.info("[changeStatus] happen error:{}", e.getMessage());
-            return Result.fail(e);
+            return Result.ok(e);
         }
         return Result.ok();
     }
