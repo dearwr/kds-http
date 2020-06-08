@@ -40,11 +40,7 @@ public class KdsMsgDao {
             };
             paramList.add(param);
         }
-        try {
-            jdbcTemplate.batchUpdate(sql, paramList);
-        } catch (Exception e) {
-            log.info("[batchAdd] already exist this type msg in db ，error :{}", e.getMessage());
-        }
+        jdbcTemplate.batchUpdate(sql, paramList);
     }
 
     public boolean updatePushed(List<String> msgIds) {

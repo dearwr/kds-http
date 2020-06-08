@@ -11,6 +11,7 @@ import com.hchc.kdshttp.mode.request.OrderStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -39,13 +40,17 @@ public class OrderMsgService {
      * @param order
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public void changeOrderStatus(OrderStatus order) {
         TKdsOrder tOrder = kdsOrderDao.query(order.getOrderNo());
         if (tOrder == null) {
             log.info("[getMsgByOrderNo] not find order :{}", order.getOrderNo());
             return;
         }
-        String newLogAction = ActionEnum.getLogActionByCallAction(order.getLogAction());
+        String newLogAction = order.getLogAction();
+        if (ActionEnum.ORDER_TAKING.getCallAction().equals(newLogAction)) {
+            newLogAction = ActionEnum.ORDER_TAKING.getLogAction();
+        }
         updateOrder(order.getUuid(), tOrder, newLogAction);
     }
 
@@ -55,7 +60,7 @@ public class OrderMsgService {
         List<String> validLogActions = ActionEnum.VALID_LOG_ACTION_MAP.get(oldLogAction);
         if (validLogActions != null && validLogActions.contains(newLogAction)) {
             KdsOrder kdsOrder = JSON.parseObject(tOrder.getData(), KdsOrder.class);
-            if (ActionEnum.ORDER_COMPLETE.getLogAction().equals(newLogAction)) {
+            if (ActionEnum.ORDER_COMPLETE.getLogAction().equals(newLogAction) || ActionEnum.ORDER_DELIVERYING.getLogAction().equals(newLogAction)) {
                 tOrder.setCompleted(true);
             }
             kdsOrder.setCallAction(ActionEnum.getCallActionByLogAction(newLogAction));
