@@ -27,7 +27,7 @@ public class QueryMsgTask implements Runnable {
 
     @Override
     public void run() {
-        log.info("start run");
+        log.info("[QueryMsgTask] start run");
         List<KdsMessage> messages;
         List<QueryMsg> queryMsgList;
         QueryMsg queryMsg;
