@@ -47,11 +47,7 @@ public class OrderMsgService {
             log.info("[getMsgByOrderNo] not find order :{}", order.getOrderNo());
             return;
         }
-        String newLogAction = order.getLogAction();
-        if (ActionEnum.ORDER_TAKING.getCallAction().equals(newLogAction)) {
-            newLogAction = ActionEnum.ORDER_TAKING.getLogAction();
-        }
-        updateOrder(order.getUuid(), tOrder, newLogAction);
+        updateOrder(order.getUuid(), tOrder, ActionEnum.getLogActionByCallAction(order.getLogAction()));
     }
 
     private void updateOrder(String uuid, TKdsOrder tOrder, String newLogAction) {
