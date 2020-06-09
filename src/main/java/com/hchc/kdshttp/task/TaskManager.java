@@ -1,5 +1,6 @@
 package com.hchc.kdshttp.task;
 
+import com.hchc.kdshttp.dao.BranchKdsDao;
 import com.hchc.kdshttp.dao.KdsMsgDao;
 import com.hchc.kdshttp.mode.request.QueryUnit;
 import com.hchc.kdshttp.mode.response.QueryMsg;
@@ -24,6 +25,9 @@ public class TaskManager {
     @Autowired
     private KdsMsgDao kdsMsgDao;
 
+    @Autowired
+    private BranchKdsDao branchKdsDao;
+
     private static final int QUERY_TASK_COUNT = 10;
     private static final ExecutorService QUERY_THREAD_POOL = new ThreadPoolExecutor(10, 10,
             60, TimeUnit.SECONDS, new LinkedBlockingDeque<>(), new CustomerThreadFactory("query"));
@@ -37,7 +41,7 @@ public class TaskManager {
         log.info("TaskManager init");
         // 初始化多个查询任务
         for (int i = 0; i < QUERY_TASK_COUNT; i++) {
-            QUERY_THREAD_POOL.submit(new QueryMsgTask(kdsMsgDao));
+            QUERY_THREAD_POOL.submit(new QueryMsgTask(kdsMsgDao, branchKdsDao));
         }
     }
 

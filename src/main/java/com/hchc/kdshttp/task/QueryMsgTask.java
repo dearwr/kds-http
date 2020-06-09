@@ -1,5 +1,6 @@
 package com.hchc.kdshttp.task;
 
+import com.hchc.kdshttp.dao.BranchKdsDao;
 import com.hchc.kdshttp.dao.KdsMsgDao;
 import com.hchc.kdshttp.entity.KdsMessage;
 import com.hchc.kdshttp.mode.request.QueryUnit;
@@ -20,9 +21,11 @@ import java.util.concurrent.TimeUnit;
 public class QueryMsgTask implements Runnable {
 
     private KdsMsgDao kdsMsgDao;
+    private BranchKdsDao branchKdsDao;
 
-    public QueryMsgTask(KdsMsgDao kdsMsgDao) {
+    public QueryMsgTask(KdsMsgDao kdsMsgDao, BranchKdsDao branchKdsDao) {
         this.kdsMsgDao = kdsMsgDao;
+        this.branchKdsDao = branchKdsDao;
     }
 
     @Override
@@ -54,6 +57,7 @@ public class QueryMsgTask implements Runnable {
                 }
                 TaskManager.setQueryData(queryUnit.getUuid(), queryMsgList);
                 TaskManager.removeWait(queryUnit.getUuid());
+                branchKdsDao.updateHeartTime(new Date(), queryUnit.getUuid());
                 log.info("[QueryMsgTask] {} {} end query", queryUnit.getBranchId(), queryUnit.getUuid());
             } catch (InterruptedException e) {
                 e.printStackTrace();
