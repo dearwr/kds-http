@@ -55,19 +55,15 @@ public class KdsMsgDao {
         return jdbcTemplate.update(sql, new Date(), orderNo) > 0;
     }
 
-    public boolean updateInvalidMsg(int branchId, String uuid, Date start, Date end) {
-        String sql = "update t_kds_message set f_status=0 , f_invalid_time=? where f_branchid=? and f_uuid=? and f_create_time between ? and ? and f_status=1";
-        return jdbcTemplate.update(sql, new Date(), branchId, uuid, start, end) > 0;
+    public boolean updateInvalidMsg(String uuid, Date start, Date end) {
+        String sql = "update t_kds_message set f_status=0 , f_invalid_time=? where f_uuid=? and f_create_time between ? and ? and f_status=1";
+        return jdbcTemplate.update(sql, new Date(), uuid, start, end) > 0;
     }
 
 
-    public List<KdsMessage> queryUnPushed(long branchId, String uuid, Date startTime, int size) {
+    public List<KdsMessage> queryUnPushed(String uuid, Date startTime, int size) {
         StringBuilder sql = new StringBuilder("select f_message_id, f_order_no, f_log_action, f_data from t_kds_message where f_status=1 and f_push_status=0 ");
         List<Object> paramList = new ArrayList<>();
-        if (branchId > 0) {
-            sql.append(" and f_branchid=? ");
-            paramList.add(branchId);
-        }
         if (uuid != null) {
             sql.append(" and f_uuid=? ");
             paramList.add(uuid);
@@ -77,7 +73,7 @@ public class KdsMsgDao {
             paramList.add(startTime);
         }
         if (size > 0) {
-            sql.append(" limit 0,? ");
+            sql.append(" limit ? ");
             paramList.add(size);
         }
         List<KdsMessage> messages = jdbcTemplate.query(sql.toString(), this::queryMapping, paramList.toArray());

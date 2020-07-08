@@ -11,6 +11,7 @@ import com.hchc.kdshttp.util.DatetimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ public class BranchKdsService {
      * @param kdsInfo
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public void bindKds(KdsInfo kdsInfo) {
         String uuid = kdsInfo.getDeviceUUID();
         BranchKds oldKds = branchKdsDao.query(uuid);
@@ -67,7 +69,7 @@ public class BranchKdsService {
                 branchKdsDao.update(oldKds);
                 Date end = new Date();
                 Date start = DatetimeUtil.dayBegin(end);
-                kdsMsgDao.updateInvalidMsg(newBranchId, uuid, start, end);
+                kdsMsgDao.updateInvalidMsg(uuid, start, end);
                 createBranchMsg(kdsInfo);
             } else {
                 if (versionChanged) {

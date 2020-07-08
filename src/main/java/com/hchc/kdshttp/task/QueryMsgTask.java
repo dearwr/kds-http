@@ -40,12 +40,12 @@ public class QueryMsgTask implements Runnable {
             try {
                 queryUnit = TaskManager.fetchWorkQueue().poll(1, TimeUnit.SECONDS);
                 if (queryUnit == null) {
-                    Thread.sleep(100);
+                    Thread.sleep(50);
                     continue;
                 }
                 log.info("[QueryMsgTask] {} {} start query", queryUnit.getBranchId(), queryUnit.getUuid());
                 startTime = DatetimeUtil.dayBegin(new Date());
-                messages = kdsMsgDao.queryUnPushed(queryUnit.getBranchId(), queryUnit.getUuid(), startTime, 30);
+                messages = kdsMsgDao.queryUnPushed(queryUnit.getUuid(), startTime, 25);
                 queryMsgList = new ArrayList<>(messages.size());
                 for (KdsMessage msg : messages) {
                     queryMsg = new QueryMsg();
