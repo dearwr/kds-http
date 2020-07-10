@@ -11,11 +11,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Result {
 
-    private int code;
+    private String code;
     private String message;
     private Object data;
 
-    public Result(int code, String message, Object data) {
+    public Result(String code, String message, Object data) {
         this.code = code;
         this.message = message;
         this.data = data;
@@ -34,7 +34,7 @@ public class Result {
     }
 
     public static Result ok(String msg, Object data) {
-        return new Result(0, msg, data);
+        return new Result("0", msg, data);
     }
 
     public static Result fail() {
@@ -46,7 +46,7 @@ public class Result {
     }
 
     public static Result fail(String msg, Object data) {
-        return new Result(999, msg, data);
+        return new Result("999", msg, data);
     }
 
     public static Result fail(Exception e) {
