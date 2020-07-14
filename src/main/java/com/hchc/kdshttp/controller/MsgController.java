@@ -132,7 +132,7 @@ public class MsgController {
             log.info("[fetchOrderStatus] happen error:{}", e.getMessage());
             return Result.fail(e);
         }
-        return Result.ok(newMsg.getData());
+        return Result.ok((Object) newMsg.getData());
     }
 
 }
