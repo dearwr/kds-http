@@ -46,7 +46,7 @@ public class BranchKdsDao {
 
 
     public List<String> queryUUIDs(int hqId, int branchId) {
-        String sql = "select f_uuid from t_branch_kds where f_hqid=? and f_branchid=? and f_open=1 ";
+        String sql = "select f_uuid from t_branch_kds where f_hqid=? and f_branchid=? ";
         return jdbcTemplate.queryForList(sql, String.class, hqId, branchId);
     }
 
