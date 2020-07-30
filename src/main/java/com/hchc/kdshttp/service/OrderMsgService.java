@@ -62,7 +62,6 @@ public class OrderMsgService {
             kdsOrder.setCallAction(ActionEnum.getCallActionByLogAction(newLogAction));
             tOrder.setData(JSON.toJSONString(kdsOrder));
             tOrder.setLogAction(newLogAction);
-            tOrder.setUpdateTime(new Date());
             kdsOrderDao.updateOrder(tOrder);
             createMsg(uuid, tOrder);
         } else {

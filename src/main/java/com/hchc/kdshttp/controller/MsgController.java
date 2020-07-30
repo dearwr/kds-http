@@ -1,6 +1,7 @@
 package com.hchc.kdshttp.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.hchc.kdshttp.dao.KdsOrderDao;
 import com.hchc.kdshttp.entity.KdsMessage;
 import com.hchc.kdshttp.mode.request.AckMsg;
 import com.hchc.kdshttp.mode.request.OrderStatus;
@@ -31,6 +32,8 @@ public class MsgController {
     private OrderMsgService orderMsgService;
     @Autowired
     private KdsMsgService kdsMsgService;
+    @Autowired
+    private KdsOrderDao kdsOrderDao;
 
     /**
      * 轮询查订单
@@ -133,6 +136,25 @@ public class MsgController {
             return Result.fail(e);
         }
         return Result.ok((Object) newMsg.getData());
+    }
+
+    /**
+     * 重复叫号
+     * @param uuid
+     * @param orderNo
+     * @return
+     */
+    @GetMapping("/repeatCall")
+    public Result repeatCall(String uuid, String orderNo) {
+        log.info("[repeatCall] recv uuid:{}, orderNo:{}", uuid, orderNo);
+        try {
+            kdsOrderDao.updateTime(orderNo);
+            return Result.ok();
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("[repeatCall] happen error:{}", e.getMessage());
+            return Result.fail(e);
+        }
     }
 
 }

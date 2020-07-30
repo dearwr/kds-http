@@ -30,6 +30,11 @@ public class KdsOrderDao {
         return jdbcTemplate.update(sql, params) > 0;
     }
 
+    public void updateTime(String orderNo) {
+        String sql = "update t_kds_order set f_update_time = ? where f_no = ? ";
+        jdbcTemplate.update(sql, new Date(), orderNo);
+    }
+
     public List<TKdsOrder> queryUncompleted(int hqId, int branchId, Date startTime) {
         String sql = "select * from t_kds_order where f_hqid=? and f_branchid=? and f_completed=0 and f_create_time > ? ";
         List<TKdsOrder> orders = jdbcTemplate.query(sql, this::queryMapping, hqId, branchId, startTime);
