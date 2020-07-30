@@ -148,7 +148,7 @@ public class MsgController {
     public Result repeatCall(String uuid, String orderNo) {
         log.info("[repeatCall] recv uuid:{}, orderNo:{}", uuid, orderNo);
         try {
-            kdsOrderDao.updateTime(orderNo);
+            kdsOrderDao.updateCallTime(orderNo);
             return Result.ok();
         } catch (Exception e) {
             e.printStackTrace();

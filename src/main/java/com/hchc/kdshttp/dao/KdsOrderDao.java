@@ -30,8 +30,8 @@ public class KdsOrderDao {
         return jdbcTemplate.update(sql, params) > 0;
     }
 
-    public void updateTime(String orderNo) {
-        String sql = "update t_kds_order set f_update_time = ? where f_no = ? ";
+    public void updateCallTime(String orderNo) {
+        String sql = "update t_kds_order set f_call_time = ? where f_no = ? ";
         jdbcTemplate.update(sql, new Date(), orderNo);
     }
 
