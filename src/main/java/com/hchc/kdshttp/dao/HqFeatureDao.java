@@ -26,7 +26,7 @@ public class HqFeatureDao {
     }
 
     public boolean addWeChatQueueEnable(long hqId, String uuid) {
-        String sql = "insert into t_hqfeature(f_code, f_name, f_type, f_hqid, f_branchid, f_status, f_createtime, f_updattime, f_value) " +
+        String sql = "insert into t_hqfeature(f_code, f_name, f_type, f_hqid, f_branchid, f_status, f_createtime, f_updatetime, f_value) " +
                 "values(?, ?, ?, ?, ?, ?, ?, ?, ?)";
         return jdbcTemplate.update(sql, uuid, "小程序排队", "WECHAT_QUEUEING", hqId, 0, "VALID", new Date(), new Date(), 11) > 0;
     }
