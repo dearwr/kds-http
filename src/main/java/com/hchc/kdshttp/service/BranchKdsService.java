@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+
 /**
  * @author wangrong
  * @date 2020-06-02
@@ -61,21 +62,17 @@ public class BranchKdsService {
             int newHqId = kdsInfo.getHqId();
             int newBranchId = kdsInfo.getBranchId();
             oldKds.setOpen(true);
-            boolean versionChanged = judgeVersionChanged(oldKds, kdsInfo);
+            judgeVersionChanged(oldKds, kdsInfo);
             if (newHqId != oldKds.getHqId() || newBranchId != oldKds.getBranchId()) {
                 log.info("[bindKds] kds change hqId or branch, uuid:{}", uuid);
                 oldKds.setHqId(newHqId);
                 oldKds.setBranchId(newBranchId);
-                branchKdsDao.update(oldKds);
                 Date end = new Date();
                 Date start = DatetimeUtil.dayBegin(end);
                 kdsMsgDao.updateInvalidMsg(uuid, start, end);
                 createBranchMsg(kdsInfo);
-            } else {
-                if (versionChanged) {
-                    branchKdsDao.update(oldKds);
-                }
             }
+            branchKdsDao.update(oldKds);
         }
     }
 
@@ -97,6 +94,7 @@ public class BranchKdsService {
 
     /**
      * 门店未完成的订单创建该uuid设备消息
+     *
      * @param kdsInfo
      */
     private void createBranchMsg(KdsInfo kdsInfo) {
