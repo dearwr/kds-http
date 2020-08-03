@@ -7,12 +7,14 @@ import com.hchc.kdshttp.dao.KdsOrderDao;
 import com.hchc.kdshttp.entity.BranchKds;
 import com.hchc.kdshttp.entity.KdsMessage;
 import com.hchc.kdshttp.entity.TKdsOrder;
+import com.hchc.kdshttp.mode.HqFeature;
 import com.hchc.kdshttp.mode.request.KdsInfo;
 import com.hchc.kdshttp.util.DatetimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -48,9 +50,11 @@ public class BranchKdsService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void bindKds(KdsInfo kdsInfo) throws Exception {
-        if (!hqFeatureDao.queryWeChatQueueEnable(kdsInfo.getHqId())) {
-            log.info("小程序排队功能尚未打开,现自动打开");
+        List<HqFeature> hqFeatureList = hqFeatureDao.queryWeChatQueueEnable(kdsInfo.getHqId());
+        if (CollectionUtils.isEmpty(hqFeatureList)) {
             hqFeatureDao.addWeChatQueueEnable(kdsInfo.getHqId(), UUID.randomUUID().toString());
+        } else if ("INVALID".equals(hqFeatureList.get(0).getStatus())) {
+            hqFeatureDao.updateWeChatEnable(kdsInfo.getHqId());
         }
         String uuid = kdsInfo.getDeviceUUID();
         BranchKds oldKds = branchKdsDao.query(uuid);
