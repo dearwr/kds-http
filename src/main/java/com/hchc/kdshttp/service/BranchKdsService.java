@@ -1,6 +1,7 @@
 package com.hchc.kdshttp.service;
 
 import com.hchc.kdshttp.dao.BranchKdsDao;
+import com.hchc.kdshttp.dao.HqFeatureDao;
 import com.hchc.kdshttp.dao.KdsMsgDao;
 import com.hchc.kdshttp.dao.KdsOrderDao;
 import com.hchc.kdshttp.entity.BranchKds;
@@ -39,6 +40,9 @@ public class BranchKdsService {
     @Autowired
     private KdsMsgService kdsMsgService;
 
+    @Autowired
+    private HqFeatureDao hqFeatureDao;
+
     /**
      * 绑定kds
      *
@@ -46,7 +50,10 @@ public class BranchKdsService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public void bindKds(KdsInfo kdsInfo) {
+    public void bindKds(KdsInfo kdsInfo) throws Exception {
+        if (!hqFeatureDao.queryWeChatQueueEnable(kdsInfo.getHqId())) {
+            throw new Exception("未开通kds接单功能");
+        }
         String uuid = kdsInfo.getDeviceUUID();
         BranchKds oldKds = branchKdsDao.query(uuid);
         if (oldKds == null) {

@@ -36,8 +36,8 @@ public class KdsOrderDao {
     }
 
     public List<TKdsOrder> queryUncompleted(int hqId, int branchId, Date startTime) {
-        String sql = "select * from t_kds_order where f_hqid=? and f_branchid=? and f_completed=0 and f_create_time > ? ";
-        List<TKdsOrder> orders = jdbcTemplate.query(sql, this::queryMapping, hqId, branchId, startTime);
+        String sql = "select * from t_kds_order where f_hqid=? and f_branchid=? and f_completed=0 and f_create_time > ? and f_type in (?, ?, ?, ?) ";
+        List<TKdsOrder> orders = jdbcTemplate.query(sql, this::queryMapping, hqId, branchId, startTime, "STORE", "MALL", "ONLINE", "DELIVERY");
         if (CollectionUtils.isEmpty(orders)) {
             return Collections.emptyList();
         }
@@ -45,8 +45,8 @@ public class KdsOrderDao {
     }
 
     public TKdsOrder query(String orderNo) {
-        String sql = "select * from t_kds_order where f_no = ? ";
-        List<TKdsOrder> orders = jdbcTemplate.query(sql, this::queryMapping, orderNo);
+        String sql = "select * from t_kds_order where f_no = ? and f_type in (?, ?, ?, ?)";
+        List<TKdsOrder> orders = jdbcTemplate.query(sql, this::queryMapping, orderNo, "STORE", "MALL", "ONLINE", "DELIVERY");
         if (CollectionUtils.isEmpty(orders)) {
             return null;
         }
