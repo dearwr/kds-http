@@ -15,10 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author wangrong
@@ -52,7 +49,8 @@ public class BranchKdsService {
     @Transactional(rollbackFor = Exception.class)
     public void bindKds(KdsInfo kdsInfo) throws Exception {
         if (!hqFeatureDao.queryWeChatQueueEnable(kdsInfo.getHqId())) {
-            throw new Exception("未开通kds接单功能");
+            log.info("小程序排队功能尚未打开,现自动打开");
+            hqFeatureDao.addWeChatQueueEnable(kdsInfo.getHqId(), UUID.randomUUID().toString());
         }
         String uuid = kdsInfo.getDeviceUUID();
         BranchKds oldKds = branchKdsDao.query(uuid);
