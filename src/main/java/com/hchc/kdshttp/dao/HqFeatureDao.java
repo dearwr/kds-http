@@ -18,8 +18,8 @@ public class HqFeatureDao {
     private JdbcTemplate jdbcTemplate;
 
     public boolean queryWeChatQueueEnable(long hqId) {
-        String sql = "SELECT count(*) from t_hqfeature where f_hqid = ? and f_type = 'WECHAT_QUEUEING' and f_status = 'VALID' ";
-        List<Integer> count = jdbcTemplate.query(sql, (rs, i) -> rs.getInt(1), hqId);
+        String sql = "SELECT count(*) as total from t_hqfeature where f_hqid = ? and f_type = 'WECHAT_QUEUEING' and f_status = 'VALID' ";
+        List<Integer> count = jdbcTemplate.query(sql, (rs, i) -> rs.getInt("total"), hqId);
         return !CollectionUtils.isEmpty(count) && count.size() != 0;
     }
 }
