@@ -109,7 +109,7 @@ public class BranchKdsService {
         List<TKdsOrder> orders = kdsOrderDao.queryUncompleted(kdsInfo.getHqId(), kdsInfo.getBranchId(), start);
         List<KdsMessage> messages = new ArrayList<>();
         for (TKdsOrder order : orders) {
-            messages.addAll(kdsMsgService.createMsgByOrder(order, Collections.singletonList(kdsInfo.getDeviceUUID()), null));
+            messages.addAll(kdsMsgService.createUnCompleteOrderMsg(order, Collections.singletonList(kdsInfo.getDeviceUUID()), null));
         }
         kdsMsgDao.batchAdd(messages);
     }

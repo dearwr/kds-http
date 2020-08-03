@@ -40,6 +40,45 @@ public class KdsMsgService {
     }
 
     /**
+     * 根据门店未完成的订单生成消息
+     *
+     * @param tOrder        订单
+     * @param uuidList      需要生成消息的uuid
+     * @param completedUuid 消息设置为完成的uuid
+     * @return
+     */
+    public List<KdsMessage> createUnCompleteOrderMsg(TKdsOrder tOrder, List<String> uuidList, String completedUuid) {
+        if (CollectionUtils.isEmpty(uuidList)) {
+            uuidList = branchKdsService.queryUUIDs(tOrder.getHqId(), tOrder.getBranchId());
+            if (CollectionUtils.isEmpty(uuidList)) {
+                log.info("[createMsgByOrder] not find uuid, no: {} , branchId:{}", tOrder.getNo(), tOrder.getBranchId());
+                return Collections.emptyList();
+            }
+        }
+        List<KdsMessage> messages = new ArrayList<>();
+        KdsMessage message;
+        for (String uuid : uuidList) {
+            if (kdsMsgDao.queryExist(tOrder.getNo(), uuid, tOrder.getLogAction())) {
+                continue;
+            }
+            message = new KdsMessage();
+            message.setMessageId(StringUtil.generateMessageId("kds"));
+            message.setBranchId(tOrder.getBranchId());
+            message.setData(tOrder.getData());
+            message.setLogAction(tOrder.getLogAction());
+            message.setUuid(uuid);
+            message.setOrderNo(tOrder.getNo());
+            message.setType(tOrder.getType());
+            if (uuid.equals(completedUuid)) {
+                message.setPushed(true);
+                message.setPushedTime(new Date());
+            }
+            messages.add(message);
+        }
+        return messages;
+    }
+
+    /**
      * 根据订单生成消息
      *
      * @param tOrder        订单

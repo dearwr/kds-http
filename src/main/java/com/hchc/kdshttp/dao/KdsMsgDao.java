@@ -97,4 +97,9 @@ public class KdsMsgDao {
         return jdbcTemplate.query(sql, this::queryMapping, uuid, orderNo);
     }
 
+    public boolean queryExist(String no, String uuid, String logAction) {
+        String sql = "select count(*) from t_kds_message where f_order_no = ? and f_uuid = ? and f_log_action = ?";
+        List<Integer> count = jdbcTemplate.query(sql, (rs, i) -> rs.getInt(1), no, uuid, logAction);
+        return !CollectionUtils.isEmpty(count) && count.size() != 0;
+    }
 }
