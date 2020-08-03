@@ -69,4 +69,8 @@ public class BranchKdsDao {
         return kds;
     }
 
+    public void unBind(int branchId, String uuid) {
+        String sql = "update t_branch_kds set f_open = 0 where f_branchid = ? and f_uuid = ?";
+        jdbcTemplate.update(sql, branchId, uuid);
+    }
 }

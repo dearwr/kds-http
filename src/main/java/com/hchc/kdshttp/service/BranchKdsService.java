@@ -113,4 +113,7 @@ public class BranchKdsService {
         return branchKdsDao.queryUUIDs(hqId, branchId);
     }
 
+    public void unBindKds(int branchId, String uuid) {
+        branchKdsDao.unBind(branchId, uuid);
+    }
 }

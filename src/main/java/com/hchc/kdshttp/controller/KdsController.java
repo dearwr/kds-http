@@ -6,10 +6,7 @@ import com.hchc.kdshttp.pack.Result;
 import com.hchc.kdshttp.service.BranchKdsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author wangrong
@@ -43,6 +40,22 @@ public class KdsController {
             return Result.fail(e);
         }
         return Result.ok();
+    }
+
+    /**
+     * kds解绑
+     */
+    @GetMapping("/unbind")
+    public Result unBind(int branchId, String uuid) {
+        log.info("[unBind] recv branchId:{}, uuid:{}", branchId, uuid);
+        try {
+            branchKdsService.unBindKds(branchId, uuid);
+            return Result.ok();
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("[unBind] happen error:{}", e.getMessage());
+            return Result.fail(e.getMessage());
+        }
     }
 
 }
