@@ -58,6 +58,7 @@ public class BranchKdsService {
         }
         String uuid = kdsInfo.getDeviceUUID();
         BranchKds oldKds = branchKdsDao.query(uuid);
+        boolean weChatEnable = branchKdsDao.queryWeChatQueueEnable(kdsInfo.getBranchId());
         if (oldKds == null) {
             log.info("[bindKds] create kds to db, uuid:{}", uuid);
             BranchKds kds = new BranchKds();
@@ -65,12 +66,18 @@ public class BranchKdsService {
             kds.setBranchId(kdsInfo.getBranchId());
             kds.setUuid(kdsInfo.getDeviceUUID());
             kds.setVersion(kdsInfo.getVersionCode());
+            if (weChatEnable) {
+                kds.setOpen(true);
+            }
             branchKdsDao.add(kds);
             createBranchMsg(kdsInfo);
         } else {
+            if (weChatEnable) {
+                oldKds.setOpen(true);
+            }
             int newHqId = kdsInfo.getHqId();
             int newBranchId = kdsInfo.getBranchId();
-            oldKds.setOpen(true);
+            oldKds.setBind(true);
             judgeVersionChanged(oldKds, kdsInfo);
             if (newHqId != oldKds.getHqId() || newBranchId != oldKds.getBranchId()) {
                 log.info("[bindKds] kds change hqId or branch, uuid:{}", uuid);
@@ -128,7 +135,7 @@ public class BranchKdsService {
     @Transactional(rollbackFor = Exception.class)
     public void unBindKds(int branchId, String uuid) {
         branchKdsDao.unBind(branchId, uuid);
-        if (branchKdsDao.queryOpenKdsCount(branchId) == 0) {
+        if (branchKdsDao.queryBindKdsCount(branchId) == 0) {
             Date end = new Date();
             Date start = DatetimeUtil.dayBegin(end);
             kdsOrderDao.completeOrders(branchId, start, end);

@@ -21,5 +21,6 @@ public class BranchKds {
     private Date offLineTime;
     private Date onlineTime;
     private String version;
+    private boolean bind;
 
 }
