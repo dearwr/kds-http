@@ -73,4 +73,10 @@ public class BranchKdsDao {
         String sql = "update t_branch_kds set f_open = 0 where f_branchid = ? and f_uuid = ?";
         jdbcTemplate.update(sql, branchId, uuid);
     }
+
+    public int queryOpenKdsCount(int branchId) {
+        String sql = "select count(*) from t_branch_kds where f_branchid = ? and f_open = 1";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, branchId);
+        return count == null ? 0 : count;
+    }
 }

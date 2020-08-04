@@ -66,4 +66,9 @@ public class KdsOrderDao {
         return tko;
     }
 
+    public void completeOrders(int branchId, Date start, Date end) {
+        String sql = "update t_kds_order set f_log_action = 'TAKE_COMPLETE' where f_branchid = ? " +
+                "and f_create_time >= ? and f_create_time < ? and f_log_action in (?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sql, branchId, start, end, "ORDER_NEW", "ORDER_PRE", "ORDER_MAKE", "ORDER_CALL", "ORDER_DELIVERYING");
+    }
 }

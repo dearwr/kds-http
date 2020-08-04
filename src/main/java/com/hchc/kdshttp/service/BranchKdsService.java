@@ -120,7 +120,18 @@ public class BranchKdsService {
         return branchKdsDao.queryUUIDs(hqId, branchId);
     }
 
+    /**
+     * 解绑 kds
+     * @param branchId
+     * @param uuid
+     */
+    @Transactional(rollbackFor = Exception.class)
     public void unBindKds(int branchId, String uuid) {
         branchKdsDao.unBind(branchId, uuid);
+        if (branchKdsDao.queryOpenKdsCount(branchId) == 0) {
+            Date end = new Date();
+            Date start = DatetimeUtil.dayBegin(end);
+            kdsOrderDao.completeOrders(branchId, start, end);
+        }
     }
 }
