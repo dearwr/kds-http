@@ -50,12 +50,12 @@ public class BranchKdsService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void bindKds(KdsInfo kdsInfo) throws Exception {
-        List<HqFeature> hqFeatureList = hqFeatureDao.queryWeChatQueueEnable(kdsInfo.getHqId());
-        if (CollectionUtils.isEmpty(hqFeatureList)) {
-            hqFeatureDao.addWeChatQueueEnable(kdsInfo.getHqId(), UUID.randomUUID().toString());
-        } else if ("INVALID".equals(hqFeatureList.get(0).getStatus())) {
-            hqFeatureDao.updateWeChatEnable(kdsInfo.getHqId());
-        }
+//        List<HqFeature> hqFeatureList = hqFeatureDao.queryWeChatQueueEnable(kdsInfo.getHqId());
+//        if (CollectionUtils.isEmpty(hqFeatureList)) {
+//            hqFeatureDao.addWeChatQueueEnable(kdsInfo.getHqId(), UUID.randomUUID().toString());
+//        } else if ("INVALID".equals(hqFeatureList.get(0).getStatus())) {
+//            hqFeatureDao.updateWeChatEnable(kdsInfo.getHqId());
+//        }
         String uuid = kdsInfo.getDeviceUUID();
         BranchKds oldKds = branchKdsDao.query(uuid);
         boolean weChatEnable = branchKdsDao.queryWeChatQueueEnable(kdsInfo.getBranchId());
