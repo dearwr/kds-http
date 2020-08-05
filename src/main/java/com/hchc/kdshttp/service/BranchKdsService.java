@@ -77,7 +77,6 @@ public class BranchKdsService {
             }
             int newHqId = kdsInfo.getHqId();
             int newBranchId = kdsInfo.getBranchId();
-            oldKds.setBind(true);
             judgeVersionChanged(oldKds, kdsInfo);
             if (newHqId != oldKds.getHqId() || newBranchId != oldKds.getBranchId()) {
                 log.info("[bindKds] kds change hqId or branch, uuid:{}", uuid);

@@ -31,8 +31,8 @@ public class BranchKdsDao {
     }
 
     public boolean update(BranchKds kds) {
-        String sql = "update t_branch_kds set f_name=?, f_hqid=?, f_branchid=?, f_bind=?, f_offline_time=?, f_online_time=?, f_version=?, f_open=? where f_uuid=? ";
-        return jdbcTemplate.update(sql, kds.getName(), kds.getHqId(), kds.getBranchId(), kds.isBind(), kds.getOffLineTime(), new Date(), kds.getVersion(), kds.getUuid(), kds.isOpen()) > 0;
+        String sql = "update t_branch_kds set f_name=?, f_hqid=?, f_branchid=?, f_bind=1, f_offline_time=?, f_online_time=?, f_version=?, f_open=? where f_uuid=? ";
+        return jdbcTemplate.update(sql, kds.getName(), kds.getHqId(), kds.getBranchId(), kds.getOffLineTime(), new Date(), kds.getVersion(), kds.getUuid(), kds.isOpen()) > 0;
     }
 
     public BranchKds query(String uuid) {
