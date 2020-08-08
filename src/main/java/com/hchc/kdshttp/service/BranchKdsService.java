@@ -107,7 +107,8 @@ public class BranchKdsService {
      */
     private void createBranchMsg(KdsInfo kdsInfo) {
         Date start = DatetimeUtil.dayBegin(new Date());
-        List<TKdsOrder> orders = kdsOrderDao.queryUncompleted(kdsInfo.getHqId(), kdsInfo.getBranchId(), start);
+        String types = "'STORE','MALL','ONLINE','DELIVERY'";
+        List<TKdsOrder> orders = kdsOrderDao.queryUncompleted(kdsInfo.getHqId(), kdsInfo.getBranchId(), start, types);
         List<KdsMessage> messages = new ArrayList<>();
         for (TKdsOrder order : orders) {
             messages.addAll(kdsMsgService.createUnCompleteOrderMsg(order, Collections.singletonList(kdsInfo.getDeviceUUID()), null));

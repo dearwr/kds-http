@@ -140,6 +140,7 @@ public class MsgController {
 
     /**
      * 重复叫号
+     *
      * @param uuid
      * @param orderNo
      * @return
@@ -153,6 +154,25 @@ public class MsgController {
         } catch (Exception e) {
             e.printStackTrace();
             log.info("[repeatCall] happen error:{}", e.getMessage());
+            return Result.fail(e);
+        }
+    }
+
+    /**
+     * 根据订单类型批量完成订单
+     */
+    @GetMapping("/order/batchComplete")
+    public Result batchComplete(int hqId, int branchId, String types) {
+        log.info("[batchComplete] recv hqId:{}, branchId:{}, types:{}", hqId, branchId, types);
+        if (StringUtils.isEmpty(types)) {
+            return Result.fail("param 'types' is empty");
+        }
+        try {
+            orderMsgService.batchCompleteByTypes(hqId, branchId, types);
+            return Result.ok();
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("[batchComplete] happen error:{}", e.getMessage());
             return Result.fail(e);
         }
     }

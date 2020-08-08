@@ -8,6 +8,7 @@ import com.hchc.kdshttp.entity.KdsMessage;
 import com.hchc.kdshttp.entity.TKdsOrder;
 import com.hchc.kdshttp.mode.kds.KdsOrder;
 import com.hchc.kdshttp.mode.request.OrderStatus;
+import com.hchc.kdshttp.util.DatetimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -78,4 +79,16 @@ public class OrderMsgService {
         kdsMsgDao.batchAdd(messages);
     }
 
+    public void batchCompleteByTypes(int hqId, int branchId, String types) {
+        types = "'" + types.replaceAll(",", "','") + "'";
+        List<TKdsOrder> orders = kdsOrderDao.queryUncompleted(hqId, branchId, DatetimeUtil.dayBegin(new Date()), types);
+        for (TKdsOrder order : orders) {
+            try {
+                updateOrder(null, order, ActionEnum.ORDER_COMPLETE.getLogAction());
+            } catch (Exception e) {
+                e.printStackTrace();
+                log.info("[batchCompleteByTypes] complete no:{} fail, error:{} ", order.getNo(), e.getMessage());
+            }
+        }
+    }
 }
