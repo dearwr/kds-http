@@ -50,15 +50,13 @@ public class BranchKdsService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void bindKds(KdsInfo kdsInfo) throws Exception {
-//        List<HqFeature> hqFeatureList = hqFeatureDao.queryWeChatQueueEnable(kdsInfo.getHqId());
-//        if (CollectionUtils.isEmpty(hqFeatureList)) {
-//            hqFeatureDao.addWeChatQueueEnable(kdsInfo.getHqId(), UUID.randomUUID().toString());
-//        } else if ("INVALID".equals(hqFeatureList.get(0).getStatus())) {
-//            hqFeatureDao.updateWeChatEnable(kdsInfo.getHqId());
-//        }
+        List<HqFeature> hqFeatureList = hqFeatureDao.queryWeChatQueueEnable(kdsInfo.getHqId());
+        if (CollectionUtils.isEmpty(hqFeatureList) || "INVALID".equals(hqFeatureList.get(0).getStatus())) {
+            throw new Exception("品牌尚未开启外网版kds功能");
+        }
+
         String uuid = kdsInfo.getDeviceUUID();
         BranchKds oldKds = branchKdsDao.query(uuid);
-        boolean weChatEnable = branchKdsDao.queryWeChatQueueEnable(kdsInfo.getBranchId());
         if (oldKds == null) {
             log.info("[bindKds] create kds to db, uuid:{}", uuid);
             BranchKds kds = new BranchKds();
@@ -66,15 +64,9 @@ public class BranchKdsService {
             kds.setBranchId(kdsInfo.getBranchId());
             kds.setUuid(kdsInfo.getDeviceUUID());
             kds.setVersion(kdsInfo.getVersionCode());
-            if (weChatEnable) {
-                kds.setOpen(true);
-            }
             branchKdsDao.add(kds);
             createBranchMsg(kdsInfo);
         } else {
-            if (weChatEnable) {
-                oldKds.setOpen(true);
-            }
             int newHqId = kdsInfo.getHqId();
             int newBranchId = kdsInfo.getBranchId();
             judgeVersionChanged(oldKds, kdsInfo);
@@ -87,6 +79,7 @@ public class BranchKdsService {
                 kdsMsgDao.updateInvalidMsg(uuid, start, end);
                 createBranchMsg(kdsInfo);
             }
+            oldKds.setOpen(true);
             branchKdsDao.update(oldKds);
         }
     }
@@ -128,6 +121,7 @@ public class BranchKdsService {
 
     /**
      * 解绑 kds
+     *
      * @param branchId
      * @param uuid
      */
@@ -135,6 +129,7 @@ public class BranchKdsService {
     public void unBindKds(int branchId, String uuid) {
         branchKdsDao.unBind(branchId, uuid);
         if (branchKdsDao.queryBindKdsCount(branchId) == 0) {
+            branchKdsDao.closeWeChatQueueEnable(branchId);
             Date end = new Date();
             Date start = DatetimeUtil.dayBegin(end);
             kdsOrderDao.completeOrders(branchId, start, end);

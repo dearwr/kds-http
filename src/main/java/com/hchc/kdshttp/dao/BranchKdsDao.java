@@ -25,7 +25,7 @@ public class BranchKdsDao {
         String sql = "insert into t_branch_kds(f_hqid, f_branchid, f_name, f_uuid, f_create_time, f_online_time, f_open) " +
                 "values(?, ?, ?, ?, ?, ?, ?)";
         Object[] params = new Object[]{
-                kds.getHqId(), kds.getBranchId(), kds.getName(), kds.getUuid(), new Date(), new Date(), kds.isOpen()
+                kds.getHqId(), kds.getBranchId(), kds.getName(), kds.getUuid(), new Date(), new Date(), 1
         };
         return jdbcTemplate.update(sql, params) > 0;
     }
@@ -92,5 +92,10 @@ public class BranchKdsDao {
             }
         }
         return false;
+    }
+
+    public void closeWeChatQueueEnable(int branchId) {
+        String sql = "update t_branch_kds set f_open = 0 where f_branchid = ?";
+        jdbcTemplate.update(sql, branchId);
     }
 }
