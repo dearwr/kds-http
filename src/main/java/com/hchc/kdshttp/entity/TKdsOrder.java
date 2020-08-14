@@ -2,7 +2,6 @@ package com.hchc.kdshttp.entity;
 
 import lombok.Data;
 
-import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -23,5 +22,8 @@ public class TKdsOrder {
     private boolean completed;
     private Date createTime;
     private Date updateTime;
+    private Date makeTime;
+    private Date callTime;
+    private String bookTime;
 
 }

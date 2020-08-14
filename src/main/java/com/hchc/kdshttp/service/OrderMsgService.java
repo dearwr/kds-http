@@ -8,7 +8,6 @@ import com.hchc.kdshttp.entity.KdsMessage;
 import com.hchc.kdshttp.entity.TKdsOrder;
 import com.hchc.kdshttp.mode.kds.KdsOrder;
 import com.hchc.kdshttp.mode.request.OrderStatus;
-import com.hchc.kdshttp.util.DatetimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -59,6 +58,10 @@ public class OrderMsgService {
             KdsOrder kdsOrder = JSON.parseObject(tOrder.getData(), KdsOrder.class);
             if (ActionEnum.ORDER_COMPLETE.getLogAction().equals(newLogAction) || ActionEnum.ORDER_DELIVERYING.getLogAction().equals(newLogAction)) {
                 tOrder.setCompleted(true);
+            } else if (ActionEnum.ORDER_MAKE.getLogAction().equals(newLogAction)) {
+                tOrder.setMakeTime(new Date());
+            } else if (ActionEnum.ORDER_TAKING.getLogAction().equals(newLogAction)) {
+                tOrder.setCallTime(new Date());
             }
             kdsOrder.setCallAction(ActionEnum.getCallActionByLogAction(newLogAction));
             tOrder.setData(JSON.toJSONString(kdsOrder));
@@ -81,7 +84,7 @@ public class OrderMsgService {
 
     public void batchCompleteByTypes(int hqId, int branchId, String types) {
         types = "'" + types.replaceAll(",", "','") + "'";
-        List<TKdsOrder> orders = kdsOrderDao.queryUncompleted(hqId, branchId, DatetimeUtil.dayBegin(new Date()), types);
+        List<TKdsOrder> orders = kdsOrderDao.queryAllUncompleted(hqId, branchId, types);
         for (TKdsOrder order : orders) {
             try {
                 updateOrder(null, order, ActionEnum.ORDER_COMPLETE.getLogAction());

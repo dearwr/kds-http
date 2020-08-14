@@ -36,7 +36,7 @@ public class KdsMsgService {
      * @return
      */
     public boolean confirmMsg(List<String> msgIds) {
-        return kdsMsgDao.updatePushed(msgIds);
+        return kdsMsgDao.confirmMsg(msgIds);
     }
 
     /**

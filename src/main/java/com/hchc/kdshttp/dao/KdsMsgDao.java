@@ -43,7 +43,7 @@ public class KdsMsgDao {
         jdbcTemplate.batchUpdate(sql, paramList);
     }
 
-    public boolean updatePushed(List<String> msgIds) {
+    public boolean confirmMsg(List<String> msgIds) {
         String msgIdStr = String.join("','", msgIds);
         String sql = "update t_kds_message set f_push_status=1 , f_pushed_time=? where f_message_id in ('" + msgIdStr + "')";
         return jdbcTemplate.update(sql, new Date()) > 0;

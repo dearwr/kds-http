@@ -23,9 +23,9 @@ public class KdsOrderDao {
     private JdbcTemplate jdbcTemplate;
 
     public boolean updateOrder(TKdsOrder tko) {
-        String sql = "update t_kds_order set f_log_action=?, f_data=?, f_completed=?, f_update_time=? where f_id=? ";
+        String sql = "update t_kds_order set f_log_action=?, f_data=?, f_completed=?, f_update_time=?, f_call_time=?, f_make_time=?, f_book_time=? where f_id=? ";
         Object[] params = new Object[]{
-                tko.getLogAction(), tko.getData(), tko.isCompleted(), new Date(), tko.getId()
+                tko.getLogAction(), tko.getData(), tko.isCompleted(), new Date(), tko.getCallTime(), tko.getMakeTime(), tko.getBookTime(), tko.getId()
         };
         return jdbcTemplate.update(sql, params) > 0;
     }
@@ -38,6 +38,15 @@ public class KdsOrderDao {
     public List<TKdsOrder> queryUncompleted(int hqId, int branchId, Date startTime, String types) {
         String sql = "select * from t_kds_order where f_hqid=? and f_branchid=? and f_completed=0 and f_create_time > ? and f_type in ( " + types + ")";
         List<TKdsOrder> orders = jdbcTemplate.query(sql, this::queryMapping, hqId, branchId, startTime);
+        if (CollectionUtils.isEmpty(orders)) {
+            return Collections.emptyList();
+        }
+        return orders;
+    }
+
+    public List<TKdsOrder> queryAllUncompleted(int hqId, int branchId, String types) {
+        String sql = "select * from t_kds_order where f_hqid=? and f_branchid=? and f_completed=0 and f_type in ( " + types + ")";
+        List<TKdsOrder> orders = jdbcTemplate.query(sql, this::queryMapping, hqId, branchId);
         if (CollectionUtils.isEmpty(orders)) {
             return Collections.emptyList();
         }
@@ -63,6 +72,9 @@ public class KdsOrderDao {
         tko.setType(rs.getString("f_type"));
         tko.setData(rs.getString("f_data"));
         tko.setLogAction(rs.getString("f_log_action"));
+        tko.setMakeTime(rs.getDate("f_make_time"));
+        tko.setCallTime(rs.getDate("f_call_time"));
+        tko.setBookTime(rs.getString("f_book_time"));
         return tko;
     }
 
