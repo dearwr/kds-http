@@ -136,4 +136,8 @@ public class BranchKdsService {
             kdsOrderDao.completeOrders(branchId, start, end);
         }
     }
+
+    public boolean queryWeChatQueueEnable(int branchId) {
+        return branchKdsDao.queryWeChatQueueEnable(branchId);
+    }
 }

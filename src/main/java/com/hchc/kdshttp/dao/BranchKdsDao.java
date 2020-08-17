@@ -84,7 +84,7 @@ public class BranchKdsDao {
         String sql = "select f_open from t_branch_kds where f_branchid = ?";
         List<Integer> openList = jdbcTemplate.query(sql, (rs, i) -> rs.getInt("f_open"), branchId);
         if (CollectionUtils.isEmpty(openList)) {
-            return true;
+            return false;
         }
         for (Integer open : openList) {
             if (open == 1) {
