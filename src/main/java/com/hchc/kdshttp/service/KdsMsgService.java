@@ -69,10 +69,6 @@ public class KdsMsgService {
             message.setUuid(uuid);
             message.setOrderNo(tOrder.getNo());
             message.setType(tOrder.getType());
-            if (uuid.equals(completedUuid)) {
-                message.setPushed(true);
-                message.setPushedTime(new Date());
-            }
             messages.add(message);
         }
         return messages;
