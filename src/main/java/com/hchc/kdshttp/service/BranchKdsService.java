@@ -131,9 +131,9 @@ public class BranchKdsService {
         branchKdsDao.unBind(branchId, uuid);
         if (branchKdsDao.queryBindKdsCount(branchId) == 0) {
             branchKdsDao.closeWeChatQueueEnable(branchId);
-            Date end = new Date();
-            Date start = DatetimeUtil.dayBegin(end);
-            kdsOrderDao.completeOrders(branchId, start, end);
+//            Date end = new Date();
+//            Date start = DatetimeUtil.dayBegin(end);
+//            kdsOrderDao.completeOrders(branchId, start, end);
         }
     }
 
