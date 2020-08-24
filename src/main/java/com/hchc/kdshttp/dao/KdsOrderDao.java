@@ -72,8 +72,8 @@ public class KdsOrderDao {
         tko.setType(rs.getString("f_type"));
         tko.setData(rs.getString("f_data"));
         tko.setLogAction(rs.getString("f_log_action"));
-        tko.setMakeTime(rs.getDate("f_make_time"));
-        tko.setCallTime(rs.getDate("f_call_time"));
+        tko.setMakeTime(rs.getTimestamp("f_make_time"));
+        tko.setCallTime(rs.getTimestamp("f_call_time"));
         tko.setBookTime(rs.getString("f_book_time"));
         return tko;
     }
