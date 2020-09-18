@@ -79,7 +79,7 @@ public class BranchKdsService {
                 kdsMsgDao.updateInvalidMsg(uuid, start, end);
                 createBranchMsg(kdsInfo);
             }
-            oldKds.setOpen(true);
+//            oldKds.setOpen(true);
             branchKdsDao.update(oldKds);
         }
     }
