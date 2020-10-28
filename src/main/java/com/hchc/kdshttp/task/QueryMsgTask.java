@@ -40,7 +40,6 @@ public class QueryMsgTask implements Runnable {
             try {
                 queryUnit = TaskManager.fetchWorkQueue().poll(1, TimeUnit.SECONDS);
                 if (queryUnit == null) {
-                    Thread.sleep(50);
                     continue;
                 }
                 log.info("[QueryMsgTask] {} {} start query", queryUnit.getBranchId(), queryUnit.getUuid());
