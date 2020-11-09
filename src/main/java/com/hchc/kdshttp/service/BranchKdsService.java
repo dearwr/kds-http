@@ -1,5 +1,6 @@
 package com.hchc.kdshttp.service;
 
+import com.hchc.kdshttp.constant.BusiException;
 import com.hchc.kdshttp.dao.BranchKdsDao;
 import com.hchc.kdshttp.dao.HqFeatureDao;
 import com.hchc.kdshttp.dao.KdsMsgDao;
@@ -52,7 +53,7 @@ public class BranchKdsService {
     public void bindKds(KdsInfo kdsInfo) throws Exception {
         List<HqFeature> hqFeatureList = hqFeatureDao.queryWeChatQueueEnable(kdsInfo.getHqId());
         if (CollectionUtils.isEmpty(hqFeatureList) || "INVALID".equals(hqFeatureList.get(0).getStatus())) {
-            throw new Exception("品牌尚未开启外网版kds功能");
+            throw new BusiException(7676, "品牌尚未开启外网版kds功能");
         }
 
         String uuid = kdsInfo.getDeviceUUID();

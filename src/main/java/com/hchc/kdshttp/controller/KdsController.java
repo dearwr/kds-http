@@ -1,6 +1,7 @@
 package com.hchc.kdshttp.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.hchc.kdshttp.constant.BusiException;
 import com.hchc.kdshttp.dao.HqFeatureDao;
 import com.hchc.kdshttp.mode.HqFeature;
 import com.hchc.kdshttp.mode.request.KdsInfo;
@@ -42,6 +43,8 @@ public class KdsController {
                 return Result.fail("param exit empty");
             }
             branchKdsService.bindKds(kdsInfo);
+        } catch (BusiException e) {
+            return new Result(String.valueOf(e.getCode()), e.getMessage(), null);
         } catch (Exception e) {
             e.printStackTrace();
             log.info("[bind] happen error :{}", e.getMessage());
