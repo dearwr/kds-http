@@ -44,7 +44,7 @@ public class OrderMsgService {
     public void changeOrderStatus(OrderStatus order) {
         TKdsOrder tOrder = kdsOrderDao.query(order.getOrderNo());
         if (tOrder == null) {
-            log.info("[getMsgByOrderNo] not find order :{}", order.getOrderNo());
+            log.info("[changeOrderStatus] not find order :{}", order.getOrderNo());
             return;
         }
         updateOrder(order.getUuid(), tOrder, ActionEnum.getLogActionByCallAction(order.getLogAction()));
