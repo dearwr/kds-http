@@ -44,7 +44,7 @@ public class QueryMsgTask implements Runnable {
                 }
                 log.info("[QueryMsgTask] {} {} start query", queryUnit.getBranchId(), queryUnit.getUuid());
                 startTime = DatetimeUtil.dayBegin(new Date());
-                messages = kdsMsgDao.queryUnPushed(queryUnit.getUuid(), startTime, 25);
+                messages = kdsMsgDao.queryUnPushed(queryUnit.getUuid(), startTime, 20);
                 queryMsgList = new ArrayList<>(messages.size());
                 for (KdsMessage msg : messages) {
                     queryMsg = new QueryMsg();
