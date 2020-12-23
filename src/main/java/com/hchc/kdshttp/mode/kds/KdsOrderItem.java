@@ -59,4 +59,6 @@ public class KdsOrderItem implements Serializable {
     private String grade = "";
     private String orderNo = "";
 
+    private double price;
+
 }

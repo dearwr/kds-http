@@ -44,10 +44,9 @@ public class KdsMsgService {
      *
      * @param tOrder        订单
      * @param uuidList      需要生成消息的uuid
-     * @param completedUuid 消息设置为完成的uuid
      * @return
      */
-    public List<KdsMessage> createUnCompleteOrderMsg(TKdsOrder tOrder, List<String> uuidList, String completedUuid) {
+    public List<KdsMessage> createUnCompleteOrderMsg(TKdsOrder tOrder, List<String> uuidList) {
         if (CollectionUtils.isEmpty(uuidList)) {
             uuidList = branchKdsService.queryUUIDs(tOrder.getHqId(), tOrder.getBranchId());
             if (CollectionUtils.isEmpty(uuidList)) {

@@ -55,4 +55,26 @@ public class KdsOrder implements Serializable {
 
     private boolean print;
 
+    private String remark;
+
+    private KdsCourier courier;
+
+    private KdsMember member;
+
+    private List<KdsStatus> status;
+
+    private KdsCustomer customer;
+
+    private KdsStatus lastStatus;
+
+    private double price;
+
+    private double actualPrice;
+
+    private String platformNo = "";
+
+    private double goodsCount;
+
+    private int wmversion;
+
 }

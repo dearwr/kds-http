@@ -108,11 +108,11 @@ public class BranchKdsService {
      */
     private void createBranchMsg(KdsInfo kdsInfo) {
         Date start = DatetimeUtil.dayBegin(new Date());
-        String types = "'STORE','MALL','ONLINE','DELIVERY'";
+        String types = "'STORE','MALL','ONLINE','DELIVERY','ELEME','MEITUAN'";
         List<TKdsOrder> orders = kdsOrderDao.queryUncompleted(kdsInfo.getHqId(), kdsInfo.getBranchId(), start, types);
         List<KdsMessage> messages = new ArrayList<>();
         for (TKdsOrder order : orders) {
-            messages.addAll(kdsMsgService.createUnCompleteOrderMsg(order, Collections.singletonList(kdsInfo.getDeviceUUID()), null));
+            messages.addAll(kdsMsgService.createUnCompleteOrderMsg(order, Collections.singletonList(kdsInfo.getDeviceUUID())));
         }
         kdsMsgDao.batchAdd(messages);
     }
@@ -132,9 +132,6 @@ public class BranchKdsService {
         branchKdsDao.unBind(branchId, uuid);
         if (branchKdsDao.queryBindKdsCount(branchId) == 0) {
             branchKdsDao.closeWeChatQueueEnable(branchId);
-//            Date end = new Date();
-//            Date start = DatetimeUtil.dayBegin(end);
-//            kdsOrderDao.completeOrders(branchId, start, end);
         }
     }
 
